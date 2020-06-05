@@ -81,3 +81,15 @@ Using gluon ts, develop a linear baseline, and then an ARIMA model to predict ho
 * data pipelines
 * graphing
 
+### 2. Benchmarking popular time series forecasting algorithms on electricity demand forecast
+Using of the Gluonts Python library in AWS Sagemaker Notebook Instance to benchmark popular time series forecast Algorithms, including ARIMA, Prophet, and DeepAR on electricity demand forecast.
+
+#### Topics covered
+* splitting data for train and test
+* Naive baselines
+* ARIMA
+* Prophet
+* DeepAR
+* Gluon TS
+* measuring outcomes
+* graphing
