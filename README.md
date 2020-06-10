@@ -93,3 +93,15 @@ Using of the Gluonts Python library in AWS Sagemaker Notebook Instance to benchm
 * Gluon TS
 * measuring outcomes
 * graphing
+
+### 3. Implementing Rapid and Cost-effective Demand Forecasting with AWS Solutions
+For retail businesses, demand forecasting is an important technology that directly impacts the profit. AWS solution makes it easy to implement advanced demand forecasting technology quickly and inexpensively. In this blog, I will show you the process of implementation and a sense of the cost.
+
+#### Topics covered
+* Amazon Forecast
+* Amazon SageMaker
+* QuickSight
+* Data Pipeline
+* Visualization
+* Cost Estimation
+
