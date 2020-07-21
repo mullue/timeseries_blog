@@ -1,4 +1,8 @@
+BLOG:
+https://quip-amazon.com/z5V6AKhoxrDo/20200722TimeSeriesblogyshiy
+
 3. Automate sales projections with Amazon Forecast, QuicksiGHT and AWS Lamda
+
 
 
 
