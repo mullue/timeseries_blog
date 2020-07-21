@@ -1,0 +1,21 @@
+{
+    "fileLocations": [
+        {
+            "URIs": [
+                
+            ]
+        },
+		{
+            "URIPrefixes": [
+                "s3://demo-forecast-805433377179/output/"
+            ]
+        }
+
+    ],
+    "globalUploadSettings": {
+        "format": "CSV",
+        "delimiter": ",",
+        "textqualifier": "'",
+        "containsHeader": "true"
+    }
+}
