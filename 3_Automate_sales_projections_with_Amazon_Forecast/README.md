@@ -115,7 +115,33 @@ Outline
 
 
 
-<reference>
+<Reference>
+AWS Well-Architected Framework – Machine Learning Lens
+https://d1.awsstatic.com/whitepapers/architecture/wellarchitected-Machine-Learning-Lens.pdf
+
+Automated and continuous deployment of Amazon SageMaker models with AWS Step Functions
+https://aws.amazon.com/blogs/machine-learning/automated-and-continuous-deployment-of-amazon-sagemaker-models-with-aws-step-functions/
+
+Manage Amazon SageMaker with Step Functions
+https://docs.aws.amazon.com/step-functions/latest/dg/connect-sagemaker.html
+
+Automating your Amazon Forecast workflow with Lambda, Step Functions, and CloudWatch Events rule
+https://aws.amazon.com/blogs/machine-learning/automating-your-amazon-forecast-workflow-with-lambda-step-functions-and-cloudwatch-events-rule/
+
+Building AI-powered forecasting automation with Amazon Forecast by applying MLOps
+https://aws.amazon.com/blogs/machine-learning/building-ai-powered-forecasting-automation-with-amazon-forecast-by-applying-mlops/
+
+Starting a State Machine Execution in Response to Amazon S3 Events
+https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-cloudwatch-events-s3.html
+
+Creating a Dataset Using Amazon S3 Files
+https://docs.aws.amazon.com/quicksight/latest/user/create-a-data-set-s3.html
+
+Forecast Visualization Automation Blog
+https://github.com/aws-samples/amazon-forecast-samples/tree/master/ml_ops/visualization_blog
+
+Analyzing contact center calls—Part 1: Use Amazon Transcribe and Amazon Comprehend to analyze customer sentiment
 https://aws.amazon.com/blogs/machine-learning/analyzing-contact-center-calls-part-1-use-amazon-transcribe-and-amazon-comprehend-to-analyze-customer-sentiment/
 
-https://github.com/aws-samples/amazon-forecast-samples/tree/master/ml_ops/visualization_blog
+
+
