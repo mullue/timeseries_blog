@@ -3,6 +3,21 @@ https://quip-amazon.com/z5V6AKhoxrDo/20200722TimeSeriesblogyshiy
 
 3. Automate sales projections with Amazon Forecast, QuicksiGHT and AWS Lamda
 
+This module is based on Well-Architected Machine Learning Lends
+https://d1.awsstatic.com/whitepapers/architecture/wellarchitected-Machine-Learning-Lens.pdf
+
+Page 43
+"
+• Additional Training Data: AWS supports mechanisms for automatically
+triggering retraining based on new data PUT to an Amazon S3 bucket. The
+preferred method to initiate a controlled execution of model retraining is to set up
+an ML pipeline that includes an event trigger based on changes to a source
+Amazon S3 bucket. To detect the presence of new training data in an S3 bucket,
+CloudTrail combined with CloudWatch Events allows you to trigger an AWS
+Lambda function or AWS Step Functions workflow to initiate retraining tasks in
+your training pipeline. The following figure illustrates the practice showing AWS
+CodePipeline with ML Services:
+"
 
 
 
