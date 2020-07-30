@@ -2,9 +2,10 @@ def lambda_handler(event, context):
     import boto3
     forecast = boto3.client('forecast')
     
-    forecast.create_forecast(
-        ForecastName='uk_sales_add_20091201_20101216',
-        PredictorArn='arn:aws:forecast:us-east-1:805433377179:predictor/uk_sales_add_20091201_20101209',
+    response = forecast.create_forecast(
+        ForecastName=event['detail']['requestParameters']['key'].replace('input/','').replace('.csv',''),
+        PredictorArn=event['PredictorArn'],
     )
-    return event
     
+    event['ForecastArn'] = response['ForecastArn']
+    return event
