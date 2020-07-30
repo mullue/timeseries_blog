@@ -3,7 +3,7 @@ def lambda_handler(event, context):
     forecast = boto3.client('forecast')
     
     response = forecast.describe_predictor(
-        PredictorArn='arn:aws:forecast:us-east-1:805433377179:predictor/uk_sales_add_20091201_20101209'
+        PredictorArn=event['PredictorArn']
     )
     
     if response['Status'] == 'ACTIVE':
