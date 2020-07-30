@@ -2,8 +2,8 @@ def lambda_handler(event, context):
     import boto3
     forecast = boto3.client('forecast')
     
-    forecast.create_predictor(
-        PredictorName='uk_sales_add_20091201_20101209',
+    responce = forecast.create_predictor(
+        PredictorName=event['detail']['requestParameters']['key'].replace('input/','').replace('.csv',''),
         ForecastHorizon=7,
         PerformAutoML=True,
         PerformHPO=False,
@@ -12,7 +12,7 @@ def lambda_handler(event, context):
             'BackTestWindowOffset': 7
         },
         InputDataConfig={
-            'DatasetGroupArn': 'arn:aws:forecast:us-east-1:805433377179:dataset-group/retail_uk_sales_prediction',
+            'DatasetGroupArn': 'arn:aws:forecast:' + event['region'] + ':' + event['account'] + ':dataset-group/retail_uk_sales_prediction',
             'SupplementaryFeatures': [
                 {
                     'Name': 'holiday',
@@ -29,4 +29,6 @@ def lambda_handler(event, context):
             ]
         },
     )
+    
+    event['PredictorArn'] = responce['PredictorArn']
     return event
