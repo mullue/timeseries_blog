@@ -5,9 +5,11 @@ https://quip-amazon.com/z5V6AKhoxrDo/20200722TimeSeriesblogyshiy
 
 # WA
 This module is based on Well-Architected Machine Learning Lends
+
 https://d1.awsstatic.com/whitepapers/architecture/wellarchitected-Machine-Learning-Lens.pdf
 
 Page 43
+
 "
 • Additional Training Data: AWS supports mechanisms for automatically
 triggering retraining based on new data PUT to an Amazon S3 bucket. The
