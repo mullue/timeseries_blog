@@ -1,7 +1,7 @@
 # BLOG
 https://quip-amazon.com/z5V6AKhoxrDo/20200722TimeSeriesblogyshiy
 
-3. Automate sales projections with Amazon Forecast, QuicksiGHT and AWS Lamda
+3. Automate sales projections with Amazon Forecast, QuickSight and AWS Lamda
 
 # WA
 This module is based on Well-Architected Machine Learning Lends
