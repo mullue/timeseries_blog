@@ -77,7 +77,7 @@ QuickSight
 
 
 ## Reference>
-AWS Well-Architected Framework – Machine Learning Lens
+AWS Well-Architected Framework – Machine Learning Lens  
 https://d1.awsstatic.com/whitepapers/architecture/wellarchitected-Machine-Learning-Lens.pdf
 
 Automated and continuous deployment of Amazon SageMaker models with AWS Step Functions
