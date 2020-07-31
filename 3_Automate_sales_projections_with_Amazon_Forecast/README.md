@@ -76,7 +76,7 @@ QuickSight
 8. Conclusion   - Other resources   - Intro next blog post in series
 
 
-## Reference>
+## Reference
 AWS Well-Architected Framework – Machine Learning Lens  
 https://d1.awsstatic.com/whitepapers/architecture/wellarchitected-Machine-Learning-Lens.pdf
 
