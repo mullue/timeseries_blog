@@ -1,5 +1,5 @@
 # BLOG
-https://quip-amazon.com/z5V6AKhoxrDo/20200722TimeSeriesblogyshiy
+https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projections_with_Amazon_Forecast/blog.md
 
 3. Automate sales projections with Amazon Forecast, QuickSight and AWS Lamda
 
