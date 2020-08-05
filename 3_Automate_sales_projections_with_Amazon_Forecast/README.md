@@ -37,10 +37,12 @@ In this blog, we're going to take retail data and run predictions with Amazon Fo
 
 # 3. Architecture design
 
-[Image: image.png](put diagram)
+![01_arch_design_2](https://user-images.githubusercontent.com/27226946/89359520-02cab680-d701-11ea-979c-c1f35cb07292.png)
+
 S3
+AWS Step Functions
+AWS Lambda
 Amazon Forecast
-Athena
 QuickSight
 
 
