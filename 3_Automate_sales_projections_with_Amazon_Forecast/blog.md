@@ -5,20 +5,20 @@ GitHub : 3_Automate_sales_projections_with_Amazon_Forecast/
 https://github.com/glyfnet/timeseries_blog/tree/master/3_Automate_sales_projections_with_Amazon_Forecast
 
 
-Introduction
+# Introduction
 
 Demand forecasting using POS data has the potential to have a huge impact on your business. We will We have a good business outlook, adequate supply to reduce lost opportunities, reduce unsold items and hold excess inventory. Make sure it is not. etc. But you don't know anything about AI and you think it's hard to build a system, right? AWS makes it easy.
 
-Problem definition
+# Problem definition
 
 In this blog, we're going to take retail data and run predictions with Amazon Forecast to Here is the flow to visualize the prediction results in Amazon QuickSight.
 
 
-Architecture design
+# Architecture design
 
 
 
-first : manual forecasting and visualization
+## first : manual forecasting and visualization
 
 
 ![01_arch_design_1](https://user-images.githubusercontent.com/27226946/89359516-0100f300-d701-11ea-8bf0-f4fbe3204119.png)
@@ -27,12 +27,12 @@ first : manual forecasting and visualization
 その後、パイプラインを作成し、S3へのアップロードをトリガにForecastを実施し、S3に結果を格納する。
 
 
-second : auto forecasting with AWS Step Functions and AWS Lambda
+## second : auto forecasting with AWS Step Functions and AWS Lambda
 
 ![01_arch_design_2](https://user-images.githubusercontent.com/27226946/89359520-02cab680-d701-11ea-979c-c1f35cb07292.png)
 
 
-Data - Download data - Data analysis (see missing data etc.)
+# Data - Download data - Data analysis (see missing data etc.)
 
 Download data from the site and calculate sales as a target variable.
 Extract the records for UK only. In this case, I use only country, timestamp and sales data.
@@ -42,9 +42,9 @@ https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projecti
 
 
 
-Forecast - import dataset - AutoML - Evaluation
+# Forecast - import dataset - AutoML - Evaluation
 
-Step 1: Import dataset
+## Step 1: Import dataset
 
 ![02_import_1](https://user-images.githubusercontent.com/27226946/89359522-03fbe380-d701-11ea-8ffd-9d0ffbd0290d.png)
 ![02_import_2](https://user-images.githubusercontent.com/27226946/89359523-04947a00-d701-11ea-86e0-15d5768a08db.png)
@@ -52,25 +52,25 @@ Step 1: Import dataset
 ![02_import_3](https://user-images.githubusercontent.com/27226946/89359527-052d1080-d701-11ea-83c4-e1c751041a77.png)
 ![02_import_4](https://user-images.githubusercontent.com/27226946/89359528-05c5a700-d701-11ea-9e49-3ed2cd399bc8.png)
 
-Step 2: Build predictor with AutoML
+## Step 2: Build predictor with AutoML
 
 ![03_predictor_1](https://user-images.githubusercontent.com/27226946/89359529-05c5a700-d701-11ea-9e7a-eff879bb6bae.png)
 ![03_predictor_2](https://user-images.githubusercontent.com/27226946/89359532-065e3d80-d701-11ea-8ab5-c1a6cde65d99.png)
 
 
 
-Step 3: Evaluation
+## Step 3: Evaluation
 
 DeepAR+ with error 14% is best solution.
 ![03_predictor_3](https://user-images.githubusercontent.com/27226946/89359534-065e3d80-d701-11ea-9497-275cfe7d9e9b.png)
 
 
-Step 4: Create a forecast
+## Step 4: Create a forecast
 
 
 ![04_forecast_1](https://user-images.githubusercontent.com/27226946/89359535-06f6d400-d701-11ea-845d-89c759fa7a9f.png)
 
-Step 5: Export forecast
+## Step 5: Export forecast
 
 ![05_export_1](https://user-images.githubusercontent.com/27226946/89359537-078f6a80-d701-11ea-9701-a703502ca9e5.png)
 ![05_export_2](https://user-images.githubusercontent.com/27226946/89359538-078f6a80-d701-11ea-8f8c-915adb7f9fd7.png)
@@ -81,7 +81,7 @@ forecast located in S3 output object.
 ![05_export_4](https://user-images.githubusercontent.com/27226946/89359540-08c09780-d701-11ea-8376-9fc21cd40164.png)
 
 
-QuickSight - Build report
+## Step 6: Visualization by QuickSight
 
 configure access to S3 bucket
 ![06_quicksight_1](https://user-images.githubusercontent.com/27226946/89359541-08c09780-d701-11ea-92f6-3183fc2ca187.png)
@@ -109,7 +109,7 @@ S3のデータを事前にクエリで加工したい場合、Amazon Athenaを�
 
 
 
-Lambda trigger - lambda job to trigger retrain and report building when new data posted to s3
+# Lambda trigger - lambda job to trigger retrain and report building when new data posted to s3
 
 
 ![07_arch](https://user-images.githubusercontent.com/27226946/89359550-0bbb8800-d701-11ea-82f1-7e8ec30952f6.png)
@@ -118,22 +118,22 @@ follow this notebook
 https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projections_with_Amazon_Forecast/2_building_pipeline.ipynb
 
 
-Step 1: create Lambda functions
+## Step 1: create Lambda functions
 
 boto3を使って、Amazon Forecastのデータインポート、predictor作成、forecast、forecast結果のexportを行う関数を作成します。また、各ジョブのステータスを取得する関数を作成します。
 
-Step 2: create Step Functions state machine
+## Step 2: create Step Functions state machine
 
 
 ![08_stepfunctions](https://user-images.githubusercontent.com/27226946/89359551-0c541e80-d701-11ea-93f1-404066bf3fcd.png)
 
 
-Step 3: Cloud Trail and Cloud Watch Events
+## Step 3: Cloud Trail and Cloud Watch Events
 
 When a file is put to S3, Step Functions are started.
 
 
-Step 4: put additional data and visualize
+## Step 4: put additional data and visualize
 
 S3にデータを置くとパイプラインが実行され、S3に予測結果が出力される。
 QuickSightにログインし、手動で可視化を実行する
@@ -159,7 +159,7 @@ Translated with www.DeepL.com/Translator (free version)
 
 ![09_predictor](https://user-images.githubusercontent.com/27226946/89359552-0cecb500-d701-11ea-8e29-93bee36a2cae.png)
 
-Step 5: Visualize with QuickSight
+## Step 5: Visualize with QuickSight
 
 前半と同じ手順で、可視化することができます。
 The same steps as in the first half of this section can be used to visualize.
@@ -167,7 +167,7 @@ The same steps as in the first half of this section can be used to visualize.
 ![10_quicksight](https://user-images.githubusercontent.com/27226946/89359553-0cecb500-d701-11ea-83e5-e618ca164fa5.png)
 
 
-Conclusion
+# Conclusion
 
 実際にビジネスで機械学習を利用するときは、運用を考慮したシステム設計が重要になります。
 今回のように、StepFunctionsとAIサービスを組み合わせることで、S3にデータを置くだけでモデルを学習し、予測結果をS3に出力するというパイプラインを簡単に構築することができます。
