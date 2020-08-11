@@ -3,7 +3,7 @@ https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projecti
 
 3. Automate sales projections with Amazon Forecast, QuickSight and AWS Lamda
 
-# WA
+# Machine Learning Lens AWS Well-Architected Framework
 This module is based on Well-Architected Machine Learning Lends
 
 https://d1.awsstatic.com/whitepapers/architecture/wellarchitected-Machine-Learning-Lens.pdf
@@ -24,7 +24,7 @@ CodePipeline with ML Services:
 
 # 1. Introduction
 
-Demand forecasting using POS data has the potential to have a huge impact on your business. We will
+Demand forecasting using POS data has the potential to have a huge impact on your business. 
 We have a good business outlook, adequate supply to reduce lost opportunities, reduce unsold items and hold excess inventory. Make sure it is not. etc.
 But you don't know anything about AI and you think it's hard to build a system, right?
 AWS makes it easy.
@@ -32,7 +32,7 @@ AWS makes it easy.
 
 # 2. Problem definition
 
-In this blog, we're going to take retail data and run predictions with Amazon Forecast to Here is the flow to visualize the prediction results in Amazon QuickSight.
+In this blog, we're going to take public retail data and run predictions with Amazon Forecast to Here is the flow to visualize the prediction results in Amazon QuickSight.
 
 
 # 3. Architecture design
