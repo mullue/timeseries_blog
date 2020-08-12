@@ -214,3 +214,9 @@ S3へのデータputとトリガとして、Step Functionsのパイプライン�
 今回ご説明したように、GUIからお手軽に検証することができるので、まずは試してみてはいかがでしょうか。
 実際に業務プロセスに組み込む際も、AWS Step Functions と AWS Lambda を利用することで、自動パイプラインを簡単に構成することができます。
 今あるデータを元にまずはトライアルをしてみてはいかがでしょうか。
+
+本ブログシリーズでは、シナリオ別に様々な時系列データを用いて、時系列分析のアプローチを紹介しています。
+* Introduction to time series forecasting with SageMaker and Python by Eric Greene
+* Benchmarking popular time series forecasting algorithms on electricity demand forecast by Yin Song
+* Anomaly Detection of timeseries by Seongmoon Kang
+
