@@ -1,18 +1,10 @@
-20200722_TimeSeries_blog_yshiy
-
-GitHub : 3_Automate_sales_projections_with_Amazon_Forecast/
-
-https://github.com/glyfnet/timeseries_blog/tree/master/3_Automate_sales_projections_with_Amazon_Forecast
-
-
 # Introduction
 
-Demand forecasting using POS data has the potential to have a huge impact on your business. We will We have a good business outlook, adequate supply to reduce lost opportunities, reduce unsold items and hold excess inventory. Make sure it is not. etc. But you don't know anything about AI and you think it's hard to build a system, right? AWS makes it easy.
+소매 업계에서는 판매 및 방문자 수를 예측하는 것이 비즈니스에 직접적인 영향을 미치는 중요한 주제입니다.정확한 판매 예측을 통해 재고 초과, 판매 기회 손실을 방지하고 더 많은 비즈니스를 달성할 수 있습니다.방문자 수를 정확하게 예측하면 직원 교대를 적절하게 계획하고 판매를 예측하는 데 도움이되는 정보를 사용할 수 있습니다.반면에 POS 데이터는 시스템에 저장되지만 AI와 머신 러닝을 활용하기가 어려울 수 있다고 생각하는 사람들도 많습니다.이 블로그에서는 AWS에서 시계열 예측을 위해 제공하는 AI 서비스인 Amazon Forecast (Amazon Forecast) 를 사용하여 어려운 프로그래밍이나 기타 작업 없이 예측을 수행하는 방법을 보여 드리겠습니다.우리는 또한 한 걸음 더 나아가 일일 배치와 함께 체계적인 방식으로 쉽게 구현할 수있는 방법을 설명 할 것입니다.체계화를 통해 S3라는 스토리지에 데이터를 공급하고 데이터 파이프라인이 실행되며 예측 결과를 S3로 출력할 수 있습니다.
 
 # Problem definition
 
-In this blog, we're going to take retail data and run predictions with Amazon Forecast to Here is the flow to visualize the prediction results in Amazon QuickSight.
-
+이 블로그는 인터넷에 게시된 영국 전자 상거래 회사의 판매 데이터를 사용하여 다음 주 판매량을 예측합니다.아마존은 Amazon Forecast 를 사용하여 GUI에서 수동으로 또는 파이프라인을 구축하여 자동으로 판매를 예측합니다.예측 결과는 Amazon QuickSight를 사용하여 시각화되므로 관리자는 판매 예측을 즉시 확인할 수 있습니다.
 
 # Architecture design
 
@@ -20,23 +12,21 @@ In this blog, we're going to take retail data and run predictions with Amazon Fo
 
 ## first : manual forecasting and visualization
 
+첫 번째 단계는 콘솔을 조작하여 판매 예측을 수행하는 것입니다.콘솔에서 Amazon Forecast 에서 데이터를 가져오고, 예측자를 교육하고, 예측을 실행하고, 예측 결과를 내보냅니다.그러면 내보낸 예측 결과가 Amazon QuickSight에서 시각화됩니다.
 
 ![01_arch_design_1](https://user-images.githubusercontent.com/27226946/89359516-0100f300-d701-11ea-8bf0-f4fbe3204119.png)
 
 
-その後、パイプラインを作成し、S3へのアップロードをトリガにForecastを実施し、S3に結果を格納する。
-
-
 ## second : auto forecasting with AWS Step Functions and AWS Lambda
+
+S3로의 데이터 업로드에 의해 트리거되며, 자동으로 데이터를 가져오고, 예측 변수를 학습하고, 예측을 실행하고, 예측 결과를 내보냅니다. 이 모든 작업은 수동 실행으로 수행됩니다.파이프라인은 AWS 람다 및 AWS 단계 기능을 사용하여 구성됩니다.출력 예측 결과는 Amazon QuickSight를 사용하여 시각화됩니다.
 
 ![01_arch_design_2](https://user-images.githubusercontent.com/27226946/89359520-02cab680-d701-11ea-979c-c1f35cb07292.png)
 
 
 # Data - Download data - Data analysis (see missing data etc.)
 
-Download data from the site and calculate sales as a target variable.
-Extract the records for UK only. In this case, I use only country, timestamp and sales data.
-I use the data from 2009/12/01-2010/12/02 as the training data, and for the additional training data in the second half, I will use the data from 2009/12/01-2010/12/09.
+1_prepare_dataset.ipynb 를 실행합니다.데이터를 다운로드하고 매출을 목표 변수로 계산합니다.교육 데이터로 2009/12/01에서 2010/12/02까지의 데이터를 준비하고 S3에 업로드합니다.그리고 2009/12/01에서 2010/12/09까지 추가 교육 데이터로, 우리는 2009/12/01에서 2010/12/09까지 데이터를 S3로 업로드합니다.
 
 https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projections_with_Amazon_Forecast/1_prepare_dataset.ipynb
 
@@ -44,136 +34,167 @@ https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projecti
 
 # Forecast - import dataset - AutoML - Evaluation
 
+교육 데이터를 S3에 저장했으면 Amazon Forecast 콘솔로 이동하여 데이터 집합을 생성할 수 있습니다.
+
 ## Step 1: Import dataset
 
+데이터 집합 그룹의 이름 (retail_uk_sales_predictin) 을 입력하고 도메인으로 소매점을 선택한 후 다음을 클릭합니다.
+
 ![02_import_1](https://user-images.githubusercontent.com/27226946/89359522-03fbe380-d701-11ea-8ffd-9d0ffbd0290d.png)
+
+데이터 집합 (uk_sales) 의 이름을 입력하고 예측 단위로 날짜를 선택하고 데이터 스키마를 그대로 두고 다음을 누릅니다.
+
 ![02_import_2](https://user-images.githubusercontent.com/27226946/89359523-04947a00-d701-11ea-86e0-15d5768a08db.png)
 
+데이터 집합 가져오기 이름 (uk_sales_2009120101_20101202) 을 입력하고 새 IAM 역할을 생성합니다.데이터 위치 필드에 이전 준비에서 저장한 교육 데이터의 S3 경로를 입력하고 [Create] 를 클릭합니다.
+
+
 ![02_import_3](https://user-images.githubusercontent.com/27226946/89359527-052d1080-d701-11ea-83c4-e1c751041a77.png)
+
+대상 시계열 데이터가 활성화될 때까지 기다립니다.다음으로 예측 변수를 훈련시킵니다.
+
 ![02_import_4](https://user-images.githubusercontent.com/27226946/89359528-05c5a700-d701-11ea-9e49-3ed2cd399bc8.png)
+
 
 ## Step 2: Build predictor with AutoML
 
+예측 변수 교육에 대한 시작을 클릭합니다.예측 대상 기간에 예측 변수명을 입력하고 예측하려는 기간인 7을 입력합니다.잠재적으로 더 정확한 예측을 위해 Amazon Forecast 에 내장된 일정 정보를 사용할 수 있습니다.휴일용 국가로 영국을 선택합니다 (선택 사항). 만들기를 클릭합니다.
+
+
 ![03_predictor_1](https://user-images.githubusercontent.com/27226946/89359529-05c5a700-d701-11ea-9e7a-eff879bb6bae.png)
+
+교육이 시작됩니다.짧은 시간이 지나면 교육이 완료되고 예측 변수 교육에서 산성이라는 단어가 표시됩니다.학습 결과를 보려면 예측 변수 교육에서 보기를 클릭합니다.
+
+
 ![03_predictor_2](https://user-images.githubusercontent.com/27226946/89359532-065e3d80-d701-11ea-8ab5-c1a6cde65d99.png)
 
 
 
 ## Step 3: Evaluation
 
-DeepAR+ with error 14% is best solution.
+AutoML 결과는 Deep_AR_Plus가 14.23% 의 오류로 알고리즘으로 선택되었음을 보여줍니다.
+
 ![03_predictor_3](https://user-images.githubusercontent.com/27226946/89359534-065e3d80-d701-11ea-9497-275cfe7d9e9b.png)
+
+그런 다음 예측을 생성하고 예측 생성을 누릅니다.
 
 
 ## Step 4: Create a forecast
 
+예측명을 입력하고 예측자에 대해 방금 학습한 예측명을 선택합니다.예측 생성을 누릅니다.
 
 ![04_forecast_1](https://user-images.githubusercontent.com/27226946/89359535-06f6d400-d701-11ea-845d-89c759fa7a9f.png)
 
+예측이 생성되면 상세내역을 검토합니다.
+
+
 ## Step 5: Export forecast
 
+예측 결과를 S3로 익스포트하고 수출 오른쪽에서 예측 내보내기 생성을 누릅니다.
+
 ![05_export_1](https://user-images.githubusercontent.com/27226946/89359537-078f6a80-d701-11ea-9701-a703502ca9e5.png)
+
+익스포트명을 입력하고 생성된 예측을 지정합니다.예측 결과를 S3로 익스포트할 위치를 지정하고 예측 익스포트 생성을 누릅니다.
+
 ![05_export_2](https://user-images.githubusercontent.com/27226946/89359538-078f6a80-d701-11ea-8f8c-915adb7f9fd7.png)
 ![05_export_3](https://user-images.githubusercontent.com/27226946/89359539-08280100-d701-11ea-9ce5-24e04fc96ade.png)
 
 
-forecast located in S3 output object.
+예측이 지정된 S3 경로로 내보내졌습니다.
+
 ![05_export_4](https://user-images.githubusercontent.com/27226946/89359540-08c09780-d701-11ea-8376-9fc21cd40164.png)
 
 
 ## Step 6: Visualization by QuickSight
 
-configure access to S3 bucket
+Amazon QuickSight에서 S3로 내보낸 예측 결과를 시각화해 보겠습니다.먼저 보안 및 권한에서 AWS 서비스에 대한 QuickSight 액세스 추가 또는 제거를 클릭하여 S3에서 파일을 읽을 수 있도록 허용합니다.
+
+
 ![06_quicksight_1](https://user-images.githubusercontent.com/27226946/89359541-08c09780-d701-11ea-92f6-3183fc2ca187.png)
+
+예측을 내보낸 S3 버킷을 선택하고 Athena Workgroup에 대한 쓰기 권한 상자를 선택합니다.이제 미리 구성을 완료했습니다.
+
 ![06_quicksight_2](https://user-images.githubusercontent.com/27226946/89359543-09592e00-d701-11ea-8b3d-25538c7a1cff.png)
 
-Loading forecast output of CSV.
+데이터를 로드하고 시각화합니다.상단 페이지에서 새 분석을 클릭합니다.
+
 ![06_quicksight_3](https://user-images.githubusercontent.com/27226946/89359544-09592e00-d701-11ea-97a4-84644d21e73d.png)
 
-choose S3
+S3를 선택합니다.
+
 ![06_quicksight_4](https://user-images.githubusercontent.com/27226946/89359545-09f1c480-d701-11ea-83c5-812eec305287.png)
-designate manifest file
+
+데이터 소스 이름에 임의의 값을 입력하여 S3 로딩을 위한 매니페스트 파일을 지정합니다.매니페스트 파일은 노트북이 실행되고 S3에 업로드 될 때 생성됩니다.
+
 https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projections_with_Amazon_Forecast/manifest_for_quicksight/manifest_uk_sales_pred.json
+
+
 ![06_quicksight_5](https://user-images.githubusercontent.com/27226946/89359546-0a8a5b00-d701-11ea-8d8a-c3b8dd12b1dd.png)
 
+데이터가 SPICE로 로드되면 시각화를 클릭합니다.
 
 ![06_quicksight_6](https://user-images.githubusercontent.com/27226946/89359547-0a8a5b00-d701-11ea-819f-f4bf2010965d.png)
 
-set attribute for visualization.
-
-
+선 그래프를 선택하고 X축의 날짜를 선택하고 값에 대해 p10 (sum), p50 (sum), p90 (sum) 을 선택합니다.이제 시각화할 수 있습니다.
 
 ![06_quicksight_7](https://user-images.githubusercontent.com/27226946/89359548-0b22f180-d701-11ea-8229-13590e2f63b0.png)
 ![06_quicksight_8](https://user-images.githubusercontent.com/27226946/89359549-0bbb8800-d701-11ea-9e5d-ff1859058533.png)
-S3のデータを事前にクエリで加工したい場合、Amazon Athenaを利用してください。
 
+단순화를 위해 S3 데이터를 직접로드했지만 쿼리를 사용하여 미리 처리하려는 경우 Amazon Athena를 사용할 수도 있습니다.
 
 
 # Lambda trigger - lambda job to trigger retrain and report building when new data posted to s3
 
+다음으로, AWS Lambda와 AWS 단계 함수를 활용하여 파이프라인을 구축해 보겠습니다.AWS Step Functions는 Amazon Forecast 에서 데이터를 자동으로 가져오고, 예측자를 구축하고, 결과를 예측하고, 내보내는 S3에 대한 데이터 입력에 의해 트리거됩니다.
+
 
 ![07_arch](https://user-images.githubusercontent.com/27226946/89359550-0bbb8800-d701-11ea-82f1-7e8ec30952f6.png)
 
-follow this notebook
+2_building_pipeline.ipynb 에서 노트북을 실행하여 파이프라인을 빌드하고 데이터를 S3에 업로드합니다.
+
 https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projections_with_Amazon_Forecast/2_building_pipeline.ipynb
 
 
 ## Step 1: create Lambda functions
 
-boto3を使って、Amazon Forecastのデータインポート、predictor作成、forecast、forecast結果のexportを行う関数を作成します。また、各ジョブのステータスを取得する関数を作成します。
+boto3을 사용하여 Amazon Forecast 에서 데이터를 가져오고, 예측 변수를 만들고, 예측하고, 예측 결과를 내보내는 함수를 생성합니다.우리는 또한 각 작업의 상태를 얻을 수있는 기능을 만들 것입니다.
 
 ## Step 2: create Step Functions state machine
 
+StepFunctions는 작업 실행, 작업 상태 확인, 완료되지 않은 경우 대기 및 완료 시 다음 작업으로 이동하여 진행합니다.
 
 ![08_stepfunctions](https://user-images.githubusercontent.com/27226946/89359551-0c541e80-d701-11ea-93f1-404066bf3fcd.png)
 
 
 ## Step 3: Cloud Trail and Cloud Watch Events
 
-When a file is put to S3, Step Functions are started.
+파일이 S3에 저장될 때 단계 기능을 실행하도록 클라우드 트레일 및 CloudWatch를 구성합니다.단계 기능 개발자 가이드가 도움이 됩니다.
+
+https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-cloudwatch-events-s3.html
 
 
 ## Step 4: put additional data and visualize
 
-S3にデータを置くとパイプラインが実行され、S3に予測結果が出力される。
-QuickSightにログインし、手動で可視化を実行する
-最後に追加の学習ファイルがS3にアップされます。そしてそれをトリガに、Step Functionsのワークフローが開始されます。
-
-
-最後まで実行されるのに少し時間がかかりますので、待ちましょう。
-ジョブが完了したら、結果がS3に格納されています。
-
-追加データによるpredictorの誤差を確認すると、8%でした。
-
-When you put the data in 3, the pipeline will run and output the prediction results to S3.
-Login to QuickSight and run the visualization manually
-At the end, an additional training file is uploaded to S3, and it triggers the Step Functions workflow. It will then trigger the Step Functions workflow.
-
-
-It will take a little while for it to run to the end, so wait.
-Once the job is completed, the result is stored in S3.
-
-When we checked the predictor error due to the additional data, it was 8%.
-
-Translated with www.DeepL.com/Translator (free version)
+단계 기능 파이프 라인은 데이터 넣어 S3에 트리거로 실행됩니다.끝까지 달리는 데는 약간의 시간이 걸립니다.작업이 완료되면 결과는 S3에 저장됩니다.추가 데이터로 예측 변수를 검사하면 Deep_AR-Plus가 선택되며 오차 한계는 8.14% 입니다.
 
 ![09_predictor](https://user-images.githubusercontent.com/27226946/89359552-0cecb500-d701-11ea-8e29-93bee36a2cae.png)
 
+
 ## Step 5: Visualize with QuickSight
 
-前半と同じ手順で、可視化することができます。
-The same steps as in the first half of this section can be used to visualize.
+이 섹션의 전반부에서와 동일한 단계를 사용하여 시각화할 수 있습니다.
 
 ![10_quicksight](https://user-images.githubusercontent.com/27226946/89359553-0cecb500-d701-11ea-83e5-e618ca164fa5.png)
 
 
+
 # Conclusion
+시계열 예측은 비즈니스의 다양한 측면에 사용되는 많은 기회를 가지고 있으며, 귀하의 비즈니스를 더 크게 만들 수 있습니다.내가 설명했듯이 GUI에서 쉽게 확인할 수 있으므로 먼저 시도해보십시오.실제로 비즈니스 프로세스에 통합할 때는 AWS 단계 함수 및 AWS Lambda를 사용하여 자동화된 파이프라인을 쉽게 구성할 수 있습니다.기존 데이터를 먼저 사용해 보지 않으시겠습니까?
 
-実際にビジネスで機械学習を利用するときは、運用を考慮したシステム設計が重要になります。
-今回のように、StepFunctionsとAIサービスを組み合わせることで、S3にデータを置くだけでモデルを学習し、予測結果をS3に出力するというパイプラインを簡単に構築することができます。
+우리는 타임 세어 데이터를 처리하기 위해 4 가지 큰 시나리오를 다루었습니다.아래에서 다른 게시물을 찾을 수 있습니다.
 
-We can now look at the predictive results. Data analysis is the goal until you make a decision. Use the results of these predictions to figure out the next move for your business. You can make predictions by item or by customer as needed. This is how AWS allows you to enjoy the benefits of AI/ML at a very low cost. It's easy to use your company's dormant data and add value to your business.
-
-In the next article, we will look at a variety of time series algorithms for power prediction.
+* Introduction to time series forecasting with SageMaker and Python by Eric Greene
+* Benchmarking popular time series forecasting algorithms on electricity demand forecast by Yin Song
+* Anomaly Detection of timeseries by Seongmoon Kang
 
 
