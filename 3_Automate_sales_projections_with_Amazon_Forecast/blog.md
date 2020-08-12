@@ -153,4 +153,10 @@ We can now look at the predictive results. Data analysis is the goal until you m
 
 In the next article, we will look at a variety of time series algorithms for power prediction.
 
+We have covered 4 big scenarios to handle timeseres data. You can find other posts below:
+
+* Introduction to time series forecasting with SageMaker and Python by Eric Greene
+* Benchmarking popular time series forecasting algorithms on electricity demand forecast by Yin Song
+* Anomaly Detection of timeseries by Seongmoon Kang
+
 
