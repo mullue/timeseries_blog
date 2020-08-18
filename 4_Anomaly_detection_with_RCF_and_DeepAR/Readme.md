@@ -1,46 +1,46 @@
 # Anomaly detection from clickstream timeseries (with SageMaker algorithm Random Cut Forest and DeepAR)
 
-This is the 4th post of timsereis anaytics sereies. This post will look at the anomaly detection form time series data. Anomaly detection has wide range of applications, from finding outliers for  preprocessing data to monitoring business performance to alert sudden spikes or drops in business metrics. For example, finding abnormal events in the following data:
+This is the 4th post of timeseries anaytics sereies. This post will look at the anomaly detection form time series data. Anomaly detection has wide range of applications, from finding outliers for preprocessing data to monitoring business performance for sudden spike or drop alerts in business metrics. For example, it is used for finding abnormal events in the following data:
 
 - The number of visitors or clickstreams in e-commerce websites
 - Changes in the number of items sold or the amount of sales in retail business
 - Changes in usage of memory and CPU in web service infrastructure
 - Changes in sensing values such as temperature, vibration, current, torque, etc. from production machines or equipments
 
-In many cases, human eye can find irregular changes easily if these data are visualized through graph. However, in real life, it is impossible for humans to visually check all hundreds of thousands of time series generated at the same time. Many time series monitoring systems are provided with a alarming features with upper or lower limits, but they end up generating too many unnecessarily fake alarms. 
+In many cases, human eyes can find irregular changes easily if these data are visualized through graph. However, in real life, it is impossible for humans to visually check all hundreds of thousands of time series data generated simultaneously. Most of the monitoring systems are provided with a alarming features with upper or lower limits, but they end up generating too many unnecessary alarms. 
 
 ![](imgs/randseries.png)
 
-Then, how can this be automated with math and programs? In this blog post, we will solve this problem by using two built-in algorithms provided by SageMaker. 
+Then, how can we automate this using math and algorithms? In this blog post, we will try to solve this problem by using two built-in algorithms provided by SageMaker. 
 
 ### Clickstream dataset
 
-As a example scenario, we will use below clickstream dataset. Dataset contains urls that users clicked, timestamps when users clicked, etc. We can easily get this type of data by parsing the log of the web service.
+We will use below clickstream dataset as an example. Dataset contains urls that users clicked, its timestamps, and etc. We can easily get this type of data by parsing the logs of the web services.
 
 ![](imgs/streams.png)
 
-When using SageMaker, DataLake will accelerate the cycle from development to deployment to production environment. AWS provides many comvenient services such as kinesis, glue, and athena for data lake and log collection. There are many reference architectures and guides for collecting clickstream logs. For example, we recommend to read [this blog post](https://aws.amazon.com/blogs/big-data/create-real-time-clickstream-sessions-and-run-analytics-with-amazon-kinesis-data-analytics-aws-glue-and-amazon-athena/).
+When using SageMaker, Data Lake will accelerate the cycle from development to deployment on production environment. AWS provides many convenient services such as Kinesis, Glue, and Athena for Data Lake and log collection. There are lots of reference architectures and guides for collecting clickstream logs. For example, we recommend to read [this blog post](https://aws.amazon.com/blogs/big-data/create-real-time-clickstream-sessions-and-run-analytics-with-amazon-kinesis-data-analytics-aws-glue-and-amazon-athena/).
 
 ### SageMaker Random Cut Forest
 
-The first algorithm to look at is Amazon SageMaker Random Cut Forest (RCF). RCF is an unsupervised algorithm for detecting anomalous data points within a mutlti dimensional data set. The key idea of this algorithm is that, when you use a decision tree to isolate all measurements, the more irregular observations are the easier you can isolate. 
+The first algorithm to look at is Amazon SageMaker Random Cut Forest (RCF). RCF is an unsupervised algorithm for detecting anomalous data points within a multi-dimensional dataset. The core idea of this algorithm is that irregular observations can be more easily found when using a decision tree to isolate all measurements.
 
-Let's say the observations are distributed as follows and we are isolating these points with an arbitrary decision tree. Isolating outlier values marked in orange would be much easier than isolating values of one of the blue points which are distributed closer together. With each data point, RCF will return anomaly score to tell us the amount of irregularity. 
+Let's say the observations are distributed as follows and we are isolating these points with an arbitrary decision tree. Isolating outlier values marked in orange would be much easier than isolating values of one of the blue points which are distributed closely together. For each data point, RCF will return anomaly score to tell us the amount of irregularity. 
 
 You may find more detailed explanation from here: [SageMaker document](https://docs.aws.amazon.com/sagemaker/latest/dg/rcf_how-it-works.html), or [youtube video](https://www.youtube.com/watch?v=yx1vf3uapX8))
 
 ![](imgs/rcf.png)
 
-While there are many applications of anomaly detection algorithms to one-dimensional time series data such as traffic volume analysis or sound volume spike detection, RCF is designed to work with arbitrary-dimensional input. Amazon SageMaker RCF scales well with respect to number of features, data set size, and number of instances.
+While there are many applications of anomaly detection algorithms for one-dimensional time series data such as traffic volume analysis or sound volume spike detection, RCF is designed to work with arbitrary-dimensional input. Amazon SageMaker RCF scales well with respect to number of features, data set size, and number of instances.
 
-For our scenario, let's transform our clickstream dataset into a new 3 dimensional timeseries. In the picture below, there are 'urls', 'users', and 'clicks' columns. 
+In this scenario, we will transform our clickstream dataset into a new 3 dimensional timeseries. In the picture below, there are 'urls', 'users', and 'clicks' columns. 
 - urls : the number of pages visited in 1 minute
 - users : the number of users visisted in 1 minute
 - clicks : the number of clicks that occurred for 1 minute.
 
 ![](imgs/resample1.png)
 
-If you transformed the clickstream into this format, learning RCF is now simple with just a few lines of code. In the example code below, we are defining SageMaker RandomCutForest object. We are passing the resource type to be used and the path of training dataset as parameters. SageMaker will allocate m4.xlarge resources for training, create a model using s3 training data, and automatically return the resources back when the job is complete.
+If you transformed the clickstream into this format, learning RCF is now simple with just a few lines of code. In the example code below, we define SageMaker RandomCutForest object. We pass the resource type to be used and the path of training dataset as parameters. SageMaker will allocate m4.xlarge resources for training, create a model using s3 training data, and automatically return the resources back when the job is complete.
 
 ```python
 from sagemaker import RandomCutForest
@@ -63,7 +63,7 @@ rcf = RandomCutForest(role=execution_role,
 rcf.fit(rcf.record_set(s.to_numpy()))
 ```
 
-Next, you will deploy the model for inference after the training job is finished. Since all the details regarding trained model are recorded in the rcf Estimator object declared in the learning step, deployment process can be done simply by calling the rcf.deploy() function. And, when deploying, we are passing another instance resource again. This sturcture allows you to designate appropriate resources for training or inference tasks.
+Next, we will deploy the model for inference after the training job is finished. Since all the details regarding trained model are recorded in the RCF Estimator object declared in the learning step, deployment process can be done simply by calling the rcf.deploy() function. When deploying, we pass another instance resource again. This structure allows you to designate appropriate resources for training or inference tasks.
 
 ```python
 rcf_inference = rcf.deploy(
@@ -72,7 +72,7 @@ rcf_inference = rcf.deploy(
 )
 ```
 
-Now, this endpoint will return the anomaly score for our dataset. Let's look at the distribution of anomaly scores calculated for the entire clickstream.
+Now, this endpoint returns the anomaly score for our dataset. Let's look at the distribution of anomaly scores calculated for the entire clickstream.
 
 ```python
 results = rcf_inference.predict(s.to_numpy())
@@ -81,19 +81,19 @@ pd.DataFrame(results['scores']).hist()
 
 ![](imgs/hist.png)
 
-Drawing a histogram is often useful when deciding the threshold of anomaly scores. Remember that the RCF algorithm was unsupervised learning. The algorithm itself cannot decide the threshold value. We need to set the threshold value according to past experience or expert judgment. In this example, we will choose a value around 5. 
+Drawing a histogram is often useful when deciding the threshold of anomaly scores. Remember that the RCF algorithm is unsupervised learning. The algorithm itself cannot decide the threshold value. We need to set the threshold value according to past experience or expert judgment. In this example, we will choose a value around 5. 
 
 Then, plot the timeseries again with the anomaly score exceeding this threshold. We ploted 3 timeseries of urls, users, clikcks features and marked the anomalies as a point.
 
 ![](imgs/rcf1.png)
 
-It seems to be catching characteristic points in the time series well. The graph is too complicated, so we will zoom in around March 6th.
+It seems to grasp characteristic points in the time series well. The graph is too complicated, so we will zoom in around March 6th.
 
 ![](imgs/rcf2.png)
 
-We can see that anomaly score was not calculated based only on the deviation from fixed upper or lower limits. Some points marked as anomaly are below the fixed red line and some points above that red line scored normal.  
+It can be seen that anomaly scores are not calculated solely based on deviations from a fixed upper or lower limit. Some points marked as anomaly are placed below the fixed red line and some points marked normal are placed above the red line.  
 
-In other words, when we use this anomaly score as a threshold instead of a simple fixed upper/lower limit, we can find anomalous points more dynamically. 
+In other words, using this anomaly score as a threshold instead of a simple fixed upper/lower limit will allow you to find anomalous points more dynamically.
 
 ### SageMaker DeepAR
 
