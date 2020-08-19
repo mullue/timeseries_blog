@@ -1,6 +1,6 @@
-# Anomaly detection from clickstream timeseries (with SageMaker algorithm Random Cut Forest and DeepAR)
+# Anomaly detection from clickstream time series (with SageMaker algorithm Random Cut Forest and DeepAR)
 
-This is the 4th post of timeseries anaytics sereies. This post will look at the anomaly detection form time series data. Anomaly detection has wide range of applications, from finding outliers for preprocessing data to monitoring business performance for sudden spike or drop alerts in business metrics. For example, it is used for finding abnormal events in the following data:
+This is the 4th post of time series anaytics sereies. This post will look at the anomaly detection form time series data. Anomaly detection has wide range of applications, from finding outliers for preprocessing data to monitoring business performance for sudden spike or drop alerts in business metrics. For example, it is used for finding abnormal events in the following data:
 
 - The number of visitors or clickstreams in e-commerce websites
 - Changes in the number of items sold or the amount of sales in retail business
@@ -33,7 +33,7 @@ You may find more detailed explanation from here: [SageMaker document](https://d
 
 While there are many applications of anomaly detection algorithms for one-dimensional time series data such as traffic volume analysis or sound volume spike detection, RCF is designed to work with arbitrary-dimensional input. Amazon SageMaker RCF scales well with respect to number of features, data set size, and number of instances.
 
-In this scenario, we will transform our clickstream dataset into a new 3 dimensional timeseries. In the picture below, there are 'urls', 'users', and 'clicks' columns. 
+In this scenario, we will transform our clickstream dataset into a new 3 dimensional time series. In the picture below, there are 'urls', 'users', and 'clicks' columns. 
 - urls : the number of pages visited in 1 minute
 - users : the number of users visisted in 1 minute
 - clicks : the number of clicks that occurred for 1 minute.
@@ -83,7 +83,7 @@ pd.DataFrame(results['scores']).hist()
 
 Drawing a histogram is often useful when deciding the threshold of anomaly scores. Remember that the RCF algorithm is unsupervised learning. The algorithm itself cannot decide the threshold value. We need to set the threshold value according to past experience or expert judgment. In this example, we will choose a value around 5. 
 
-Then, plot the timeseries again with the anomaly score exceeding this threshold. We ploted 3 timeseries of urls, users, clikcks features and marked the anomalies as a point.
+Then, plot the time series again with the anomaly score exceeding this threshold. We ploted 3 time series of urls, users, clikcks features and marked the anomalies as a point.
 
 ![](imgs/rcf1.png)
 
@@ -97,17 +97,17 @@ In other words, using this anomaly score as a threshold instead of a simple fixe
 
 ### SageMaker DeepAR
 
-Many of time series studies deal with predictions for future time series. These time series prediction algorithms can also be used to detect anomalies. The prediction of future time series is based on past patterns. This means that if the input time series is unusually different from the past pattern, it will  deviate significantly from the predicted future time series.
+Most of the time series studies deal with predictions for future time series. These time series prediction algorithms can also be used to detect anomalies. The prediction of future time series is based on past patterns. This means that if the input time series is unusually different from the past pattern, it will deviate significantly from the predicted future time series.
 
-The Amazon SageMaker DeepAR forecasting algorithm is a supervised learning algorithm for forecasting scalar (one-dimensional) time series using Recurrent Neural Networks (RNN). Unlike traditional algorithms such as ARIMA(autoregressive integrated moving average) or ETS(exponential smoothing), DeepAR can take into account additional features such as related time series or meta information of timeseries together. 
+The Amazon SageMaker DeepAR forecasting algorithm is a supervised learning algorithm for forecasting scalar (one-dimensional) time series using Recurrent Neural Networks (RNN). Unlike traditional algorithms such as ARIMA(autoregressive integrated moving average) or ETS(exponential smoothing), DeepAR can take into account additional features such as related time series or meta information of time series together. 
 
-In this scenario, we will use the number of clicks in 10 minutes as target series and the number of visitors in 10 minutes as related series(dynamic feature).  We will divide timeseries by url(page). Each url will have its own clickstreams. You can consider url as a product sold and clicks as sales if we transform this usecase into the retail business. 
+In this scenario, we will use the number of clicks in 10 minutes as target series and the number of visitors in 10 minutes as related series(dynamic feature).  We will divide time series by url(page). Each url will have its own clickstreams. You can consider url as a product sold and clicks as sales if we transform this usecase into the retail business. 
 
 ![](imgs/resample2.png)
 
-In order to use DeepAR of SageMaker, we will change the record format. The records in your input files will contain the following fields:
+In order to use DeepAR of SageMaker, we should change the record format. The records in your input files should contain the following fields:
 
-- start : The start timestamp. A string with the format YYYY-MM-DD HH:MM:SS.
+- start : The start timestamp. A string with the format of YYYY-MM-DD HH:MM:SS.
 - target : An array of floating-point values or integers that represent the time series. Here, we will use clickstream counts in 10 minutes for forecasting value.
 - dynamic_feat (optional) : An array of arrays of floating-point values or integers that represents the vector of custom feature time series. Here, we will use the number of visitors in 10 minutes for dynamic features.
 - cat (optional) : An array of categorical features that can be used to encode the groups that the record belongs to. We do not use categorical values in this example.
@@ -149,7 +149,7 @@ estimator.set_hyperparameters(**hyperparameters)
 estimator.fit({"train": train_s3}, wait=True)
 ```
 
-After the training, we will create an endpoint and run predictions just like RCF. This time, the model will return the distributed timeseries prediction for 0.1, 0.5, and 0.9 quantiles. 
+After the training, we will create an endpoint and run predictions just like RCF. This time, the model will return the distributed time series prediction for 0.1, 0.5, and 0.9 quantiles. 
 
 ```python
 predictor = estimator.deploy(
@@ -167,15 +167,15 @@ Then, let's plot the forecasting results. If the prediction of the time series i
 
 ![](imgs/deepar1.png)
 
-The following figure is the result of resampling the prediction results from 10 minutes to 2 hours. Depending on the business case, the forecasting unit may be different from the one used in the training. If you resample them with larger units of time, the prediction results will be smoother. This kind of manipulation can be used to prevent too frequent noise alarms when setting the upper/lower monitoring limit with the prediction range of time series. 
+The following figure is the result of resampling the prediction results from 10 minutes to 2 hours. Depending on the business case, the forecasting unit may be different from the one used in the training. If you resample them with larger units of time, the prediction results will be smoother. This kind of manipulation can be used to prevent too much frequent noise alarms when setting the upper/lower monitoring limit with the prediction range of time series. 
 
 ![](imgs/deepar2.png)
 
 ### Conclusion
 
-In this blog post, we introduced two examples of how to use SageMaker built-in algorithms to detect anomalous points in timeseries. When we use built-in algorithms provided by SageMaker, we can develop the model with simple steps and deploy them to real application much more easier. 
+In this blog post, we introduced two examples of how to use SageMaker built-in algorithms to detect anomalous points in time series. When we use built-in algorithms provided by SageMaker, we can develop the model with simple steps and deploy them to real application much more easier. 
 
-This is the final post of the series of timeseries analytics. We have covered 4 major scenarios to handle timeseres. We hope our posts help you get more insights to tackle various timeseries problems. You can find other posts below:
+This is the final post of the series of time series analytics. We have covered 4 major scenarios to handle time series. We hope our posts help you get more insights to tackle various time series problems. You can find other posts below:
 
 - Introduction to time series forecasting with SageMaker and Python by Eric Greene
 - Benchmarking popular time series forecasting algorithms on electricity demand forecast by Yin Song
