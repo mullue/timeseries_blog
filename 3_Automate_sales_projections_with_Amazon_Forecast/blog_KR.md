@@ -1,10 +1,10 @@
 # Introduction
 
-소매 업계에서는 판매 및 방문자 수를 예측하는 것이 비즈니스에 직접적인 영향을 미치는 중요한 주제입니다.정확한 판매 예측을 통해 재고 초과, 판매 기회 손실을 방지하고 더 많은 비즈니스를 달성할 수 있습니다.방문자 수를 정확하게 예측하면 직원 교대를 적절하게 계획하고 판매를 예측하는 데 도움이되는 정보를 사용할 수 있습니다.반면에 POS 데이터는 시스템에 저장되지만 AI와 머신 러닝을 활용하기가 어려울 수 있다고 생각하는 사람들도 많습니다.이 블로그에서는 AWS에서 시계열 예측을 위해 제공하는 AI 서비스인 Amazon Forecast (Amazon Forecast) 를 사용하여 어려운 프로그래밍이나 기타 작업 없이 예측을 수행하는 방법을 보여 드리겠습니다.우리는 또한 한 걸음 더 나아가 일일 배치와 함께 체계적인 방식으로 쉽게 구현할 수있는 방법을 설명 할 것입니다.체계화를 통해 S3라는 스토리지에 데이터를 공급하고 데이터 파이프라인이 실행되며 예측 결과를 S3로 출력할 수 있습니다.
+소매 업계에서는 판매 및 방문자 수를 예측하는 것이 비즈니스에 직접적인 영향을 미치는 중요한 주제입니다. 정확한 판매 예측을 통해 과잉 재고가 발생하지 않도록 하거나, 판매 기회를 잃지 않도록 하여 비즈니스를 더 효율적으로 운영할 수 있습니다. 방문자 수를 정확하게 예측하면 직원 교대를 적절하게 계획하고 판매량을 예측할 수 있습니다. 하지만 POS 데이터가 시스템에 저장됨에도 불구하고, 여기에 AI와 머신 러닝을 활용하기가 어려울 수 있다고 생각하는 사람들도 많습니다. 이 블로그에서는 AWS에서 시계열 예측을 위해 제공하는 AI 서비스인 Amazon Forecast (Amazon Forecast) 를 사용하여 어려운 프로그래밍이나 기타 작업 없이 예측을 수행하는 방법을 보여 드릴 예정입니다. 그리고 한 걸음 더 나아가 이러한 예측이 일일 배치를 통해 얼마나 쉽게 시스템으로 구현될 수 있는지 예를 들어 설명해 드릴 겁니다. 이 시스템을 통해 S3라는 스토리지에 데이터를 공급하면 바로 데이터 파이프라인이 실행되어 예측 결과가 S3로 출력됩니다.
 
 # Problem definition
 
-이 블로그는 인터넷에 게시된 영국 전자 상거래 회사의 판매 데이터를 사용하여 다음 주 판매량을 예측합니다.아마존은 Amazon Forecast 를 사용하여 GUI에서 수동으로 또는 파이프라인을 구축하여 자동으로 판매를 예측합니다.예측 결과는 Amazon QuickSight를 사용하여 시각화되므로 관리자는 판매 예측을 즉시 확인할 수 있습니다.
+이 블로그는 인터넷에 게시된 영국 전자 상거래 회사의 판매 데이터를 사용하여 다음 주 판매량을 예측합니다. 우리는 Amazon Forecast 를 사용하여 판매를 예측할 겁니다. 이 작업은 GUI에서 직접 수동으로 수행할 수도 있고, 자동화된 파이프라인을 구축하는 방식으로도 수행할 수 있습니다. 예측 결과는 Amazon QuickSight를 사용하여 시각화되므로 관리자는 판매 예측을 즉시 확인할 수 있습니다.
 
 # Architecture design
 
@@ -12,21 +12,21 @@
 
 ## first : manual forecasting and visualization
 
-첫 번째 단계는 콘솔을 조작하여 판매 예측을 수행하는 것입니다.콘솔에서 Amazon Forecast 에서 데이터를 가져오고, 예측자를 교육하고, 예측을 실행하고, 예측 결과를 내보냅니다.그러면 내보낸 예측 결과가 Amazon QuickSight에서 시각화됩니다.
+첫 번째 단계는 콘솔을 이용하여 판매 예측을 수행하는 것입니다. Amazon Forecast 콘솔에서 데이터를 가져오고, 예측자를 학습시키고, 예측을 실행하고, 예측 결과를 내보냅니다. 내보낸 예측 결과는 Amazon QuickSight에서 시각화됩니다.
 
 ![01_arch_design_1](https://user-images.githubusercontent.com/27226946/89359516-0100f300-d701-11ea-8bf0-f4fbe3204119.png)
 
 
 ## second : auto forecasting with AWS Step Functions and AWS Lambda
 
-S3로의 데이터 업로드에 의해 트리거되며, 자동으로 데이터를 가져오고, 예측 변수를 학습하고, 예측을 실행하고, 예측 결과를 내보냅니다. 이 모든 작업은 수동 실행으로 수행됩니다.파이프라인은 AWS 람다 및 AWS 단계 기능을 사용하여 구성됩니다.출력 예측 결과는 Amazon QuickSight를 사용하여 시각화됩니다.
+S3로 데이터를 업로드하면 자동적으로 트리거가 동작하여 데이터를 가져오고, 예측자를 학습하고, 예측을 실행하고, 예측 결과를 내보냅니다. 이 모든 작업은 자동으로 수행됩니다. 파이프라인은 AWS Lambda 및 AWS Step Function으로 구성됩니다. 출력 예측 결과는 Amazon QuickSight를 사용하여 시각화됩니다.
 
 ![01_arch_design_2](https://user-images.githubusercontent.com/27226946/89359520-02cab680-d701-11ea-979c-c1f35cb07292.png)
 
 
 # Data - Download data - Data analysis (see missing data etc.)
 
-1_prepare_dataset.ipynb 를 실행합니다.데이터를 다운로드하고 매출을 목표 변수로 계산합니다.교육 데이터로 2009/12/01에서 2010/12/02까지의 데이터를 준비하고 S3에 업로드합니다.그리고 2009/12/01에서 2010/12/09까지 추가 교육 데이터로, 우리는 2009/12/01에서 2010/12/09까지 데이터를 S3로 업로드합니다.
+1_prepare_dataset.ipynb 를 실행합니다. 데이터를 다운로드하고 매출을 목표 변수로 계산합니다. 트레이닝 데이터로 2009/12/01에서 2010/12/02까지의 데이터를 준비하고 S3에 업로드합니다. 그리고 2009/12/01에서 2010/12/09까지의 데이터를 추가 트레이닝 데이터로 S3에 업로드합니다.
 
 https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projections_with_Amazon_Forecast/1_prepare_dataset.ipynb
 
@@ -34,11 +34,11 @@ https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projecti
 
 # Forecast - import dataset - AutoML - Evaluation
 
-교육 데이터를 S3에 저장했으면 Amazon Forecast 콘솔로 이동하여 데이터 집합을 생성할 수 있습니다.
+트레이닝 데이터를 S3에 저장했으면 Amazon Forecast 콘솔로 이동하여 데이터 집합을 생성합니다.
 
 ## Step 1: Import dataset
 
-데이터 집합 그룹의 이름 (retail_uk_sales_predictin) 을 입력하고 도메인으로 소매점을 선택한 후 다음을 클릭합니다.
+Dataset Group의 이름 (retail_uk_sales_predictin) 을 입력하고 도메인으로 소매점을 선택한 후 다음을 클릭합니다.
 
 ![02_import_1](https://user-images.githubusercontent.com/27226946/89359522-03fbe380-d701-11ea-8ffd-9d0ffbd0290d.png)
 
