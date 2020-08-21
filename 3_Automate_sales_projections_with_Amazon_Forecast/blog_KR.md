@@ -19,7 +19,7 @@
 
 ## second : auto forecasting with AWS Step Functions and AWS Lambda
 
-S3로 데이터를 업로드하면 자동적으로 트리거가 동작하여 데이터를 가져오고, 예측자를 학습하고, 예측을 실행하고, 예측 결과를 내보냅니다. 이 모든 작업은 자동으로 수행됩니다. 파이프라인은 AWS Lambda 및 AWS Step Function으로 구성됩니다. 출력 예측 결과는 Amazon QuickSight를 사용하여 시각화됩니다.
+S3로 데이터를 업로드하면 자동적으로 트리거가 동작하여 데이터를 가져오고, 예측자를 학습하고, 예측을 실행하고, 예측 결과를 내보냅니다. S3에 데이터를 올리는 작업을 제외하면 이 모든 작업은 자동으로 수행됩니다. 파이프라인은 AWS Lambda 및 AWS Step Function으로 구성됩니다. 출력 예측 결과는 Amazon QuickSight를 사용하여 시각화됩니다.
 
 ![01_arch_design_2](https://user-images.githubusercontent.com/27226946/89359520-02cab680-d701-11ea-979c-c1f35cb07292.png)
 
@@ -124,7 +124,7 @@ S3를 선택합니다.
 
 ![06_quicksight_4](https://user-images.githubusercontent.com/27226946/89359545-09f1c480-d701-11ea-83c5-812eec305287.png)
 
-데이터 소스 이름에 임의의 값을 입력하여 S3 로딩을 위한 매니페스트 파일을 지정합니다.매니페스트 파일은 노트북이 실행되고 S3에 업로드 될 때 생성됩니다.
+데이터 소스 이름에 임의의 값을 입력하여 S3 로딩을 위한 매니페스트 파일을 지정합니다. 매니페스트 파일은 노트북이 실행되고 S3에 업로드 될 때 생성됩니다.
 
 https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projections_with_Amazon_Forecast/manifest_for_quicksight/manifest_uk_sales_pred.json
 
@@ -135,18 +135,17 @@ https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projecti
 
 ![06_quicksight_6](https://user-images.githubusercontent.com/27226946/89359547-0a8a5b00-d701-11ea-819f-f4bf2010965d.png)
 
-선 그래프를 선택하고 X축의 날짜를 선택하고 값에 대해 p10 (sum), p50 (sum), p90 (sum) 을 선택합니다.이제 시각화할 수 있습니다.
+선 그래프를 선택한 후, X축에 대해서는 날짜를 선택하고 값으로 p10 (sum), p50 (sum), p90 (sum) 을 선택합니다.이제 시각화할 수 있습니다.
 
 ![06_quicksight_7](https://user-images.githubusercontent.com/27226946/89359548-0b22f180-d701-11ea-8229-13590e2f63b0.png)
 ![06_quicksight_8](https://user-images.githubusercontent.com/27226946/89359549-0bbb8800-d701-11ea-9e5d-ff1859058533.png)
 
-단순화를 위해 S3 데이터를 직접로드했지만 쿼리를 사용하여 미리 처리하려는 경우 Amazon Athena를 사용할 수도 있습니다.
+여기서는 단순화를 위해 S3 데이터를 직접 로드했습니다만, Amazon Athena의 쿼리를 이용하여 데이터를 전처리한 후 시각화 할 수도 있습니다.
 
 
 # Lambda trigger - lambda job to trigger retrain and report building when new data posted to s3
 
-다음으로, AWS Lambda와 AWS 단계 함수를 활용하여 파이프라인을 구축해 보겠습니다.AWS Step Functions는 Amazon Forecast 에서 데이터를 자동으로 가져오고, 예측자를 구축하고, 결과를 예측하고, 내보내는 S3에 대한 데이터 입력에 의해 트리거됩니다.
-
+다음으로 AWS Lambda와 AWS Step Functions을 활용하여 파이프라인을 구축해 보겠습니다. 여기서 AWS Step Functions는 S3에 데이터가 들어오면 실행되어 자동으로 Amazon Forecast로 데이터를 가져오고, 예측자를 구성하고, 결과를 예측하는 작업을 자동화합니다.
 
 ![07_arch](https://user-images.githubusercontent.com/27226946/89359550-0bbb8800-d701-11ea-82f1-7e8ec30952f6.png)
 
@@ -157,41 +156,41 @@ https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projecti
 
 ## Step 1: create Lambda functions
 
-boto3을 사용하여 Amazon Forecast 에서 데이터를 가져오고, 예측 변수를 만들고, 예측하고, 예측 결과를 내보내는 함수를 생성합니다.우리는 또한 각 작업의 상태를 얻을 수있는 기능을 만들 것입니다.
+boto3을 사용하여 Amazon Forecast로 데이터를 가져오고, 예측자를 만들고, 예측하고, 예측 결과를 내보내는 함수들을 생성할 예정입니다. 그리고 각 작업의 상태를 확인하는 함수를 만들 것입니다.
 
 ## Step 2: create Step Functions state machine
 
-StepFunctions는 작업 실행, 작업 상태 확인, 완료되지 않은 경우 대기 및 완료 시 다음 작업으로 이동하여 진행합니다.
+Step Functions는 작업을 실행시킨 후 상태를 확인하여 진행 여부를 결정합니다. 만약 작업이 완료되지 않은 경우 완료될 때까지 대기하고, 완료된 경우 다음 작업으로 넘어가는 형태로 구성합니다.
 
 ![08_stepfunctions](https://user-images.githubusercontent.com/27226946/89359551-0c541e80-d701-11ea-93f1-404066bf3fcd.png)
 
 
 ## Step 3: Cloud Trail and Cloud Watch Events
 
-파일이 S3에 저장될 때 단계 기능을 실행하도록 클라우드 트레일 및 CloudWatch를 구성합니다.단계 기능 개발자 가이드가 도움이 됩니다.
+S3에 파일이 업로드되면 Step Functions를 실행하도록 CloudTrail 및 CloudWatch를 설정합니다. 자세한 사항이 궁금하신 경우 Step Functions 개발자 가이드를 참고하세요.
 
 https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-cloudwatch-events-s3.html
 
 
 ## Step 4: put additional data and visualize
 
-단계 기능 파이프 라인은 데이터 넣어 S3에 트리거로 실행됩니다.끝까지 달리는 데는 약간의 시간이 걸립니다.작업이 완료되면 결과는 S3에 저장됩니다.추가 데이터로 예측 변수를 검사하면 Deep_AR-Plus가 선택되며 오차 한계는 8.14% 입니다.
+S3에 데이터가 업로드되면 Step Functions 파이프라인이 실행됩니다. 모든 단계가 실행되기까지는 시간이 조금 걸릴 수 있습니다. 작업이 완료된 후 S3에 결과가 저장됩니다. 추가 데이터로 예측자를 테스트해 보면, 오차 한계 8.14%로 Deep_AR-Plus가 적합한 알고리즘으로 선택됩니다.
 
 ![09_predictor](https://user-images.githubusercontent.com/27226946/89359552-0cecb500-d701-11ea-8e29-93bee36a2cae.png)
 
 
 ## Step 5: Visualize with QuickSight
 
-이 섹션의 전반부에서와 동일한 단계를 사용하여 시각화할 수 있습니다.
+앞서 QuickSight를 구성한 것과 동일한 방법으로 시각화 할 수 있습니다.
 
 ![10_quicksight](https://user-images.githubusercontent.com/27226946/89359553-0cecb500-d701-11ea-83e5-e618ca164fa5.png)
 
 
 
 # Conclusion
-시계열 예측은 비즈니스의 다양한 측면에 사용되는 많은 기회를 가지고 있으며, 귀하의 비즈니스를 더 크게 만들 수 있습니다.내가 설명했듯이 GUI에서 쉽게 확인할 수 있으므로 먼저 시도해보십시오.실제로 비즈니스 프로세스에 통합할 때는 AWS 단계 함수 및 AWS Lambda를 사용하여 자동화된 파이프라인을 쉽게 구성할 수 있습니다.기존 데이터를 먼저 사용해 보지 않으시겠습니까?
+시계열 예측은 비즈니스의 다양한 측면에 활용되어 비즈니스를 확장시킬 수 있는 기회를 제공합니다. 위에서 보신 것과 같이 GUI를 이용하여 쉽게 테스트하고 그 결과를 확인할 수 있습니다. 실제로 비즈니스 프로세스에 통합하고자 하실 때는 AWS Step Functions 및 AWS Lambda 를 사용하여 자동화된 파이프라인을 쉽게 구성할 수 있습니다. 가지고 계신 데이터를 이용하여 한 번 시도해 보시는 게 어떨까요?
 
-우리는 타임 세어 데이터를 처리하기 위해 4 가지 큰 시나리오를 다루었습니다.아래에서 다른 게시물을 찾을 수 있습니다.
+저희는 이 글을 포함하여, 시계열 데이터 처리를 위한 네 가지 방법들을 블로그로 포스팅하였습니다. 아래에서 다른 시나리오들도 확인해 보세요.
 
 * Introduction to time series forecasting with SageMaker and Python by Eric Greene
 * Benchmarking popular time series forecasting algorithms on electricity demand forecast by Yin Song
