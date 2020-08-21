@@ -1,6 +1,6 @@
 # Anomaly detection from clickstream time series (with SageMaker algorithm Random Cut Forest and DeepAR)
 
-This is the 4th post of time series anaytics sereies. This post will look at the anomaly detection form time series data. Anomaly detection has wide range of applications, from finding outliers for preprocessing data to monitoring business performance for sudden spike or drop alerts in business metrics. For example, it is used for finding abnormal events in the following data:
+This is the 4th post of time series anaytics series. This post will look at the anomaly detection form time series data. Anomaly detection has wide range of applications, from finding outliers for preprocessing data to monitoring business performance for sudden spike or drop alerts in business metrics. For example, it is used for finding abnormal events in the following data:
 
 - The number of visitors or clickstreams in e-commerce websites
 - Changes in the number of items sold or the amount of sales in retail business
