@@ -38,32 +38,32 @@ https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projecti
 
 ## Step 1: Import dataset
 
-Dataset Group의 이름 (retail_uk_sales_predictin) 을 입력하고 도메인으로 소매점을 선택한 후 다음을 클릭합니다.
+Dataset group의 이름을 (retail_uk_sales_predictin)로 입력하고 domain으로 Retail을 선택한 후 Next를 클릭합니다.
 
 ![02_import_1](https://user-images.githubusercontent.com/27226946/89359522-03fbe380-d701-11ea-8ffd-9d0ffbd0290d.png)
 
-데이터 집합 (uk_sales) 의 이름을 입력하고 예측 단위로 날짜를 선택하고 데이터 스키마를 그대로 두고 다음을 누릅니다.
+Dataset의 이름을 (uk_sales)로 입력하고 Forecast unit으로 day를 선택합니다. Data schema란은 그대로 두고 Next를 누릅니다.
 
 ![02_import_2](https://user-images.githubusercontent.com/27226946/89359523-04947a00-d701-11ea-86e0-15d5768a08db.png)
 
-데이터 집합 가져오기 이름 (uk_sales_2009120101_20101202) 을 입력하고 새 IAM 역할을 생성합니다.데이터 위치 필드에 이전 준비에서 저장한 교육 데이터의 S3 경로를 입력하고 [Create] 를 클릭합니다.
+Dataset Import name을 (uk_sales_2009120101_20101202)로 입력하고, 새 IAM 역할을 생성합니다. Data location 란에 이전 준비 단계에서 저장해 둔 트레이닝 데이터의 S3 경로를 입력하고 [Create] 를 클릭합니다.
 
 
 ![02_import_3](https://user-images.githubusercontent.com/27226946/89359527-052d1080-d701-11ea-83c4-e1c751041a77.png)
 
-대상 시계열 데이터가 활성화될 때까지 기다립니다.다음으로 예측 변수를 훈련시킵니다.
+대상 시계열 데이터가 활성화될 때까지 기다립니다. 다음으로 예측자를 훈련시킵니다.
 
 ![02_import_4](https://user-images.githubusercontent.com/27226946/89359528-05c5a700-d701-11ea-9e49-3ed2cd399bc8.png)
 
 
 ## Step 2: Build predictor with AutoML
 
-예측 변수 교육에 대한 시작을 클릭합니다.예측 대상 기간에 예측 변수명을 입력하고 예측하려는 기간인 7을 입력합니다.잠재적으로 더 정확한 예측을 위해 Amazon Forecast 에 내장된 일정 정보를 사용할 수 있습니다.휴일용 국가로 영국을 선택합니다 (선택 사항). 만들기를 클릭합니다.
+Train Predictor에서 Start 버튼을 클릭합니다. Predictor name에 이름을 입력하고, Forecast horizon에 예측하려는 기간인 7을 입력합니다. 잠재적으로 더 정확한 예측을 위해 Amazon Forecast 에 내장된 달력 정보를 활용할 수 있습니다. 여기서는 휴일 달력 적용 국가로 영국을 선택합니다(선택 사항). Create를 클릭합니다.
 
 
 ![03_predictor_1](https://user-images.githubusercontent.com/27226946/89359529-05c5a700-d701-11ea-9e7a-eff879bb6bae.png)
 
-교육이 시작됩니다.짧은 시간이 지나면 교육이 완료되고 예측 변수 교육에서 산성이라는 단어가 표시됩니다.학습 결과를 보려면 예측 변수 교육에서 보기를 클릭합니다.
+트레이닝이 시작됩니다. 조금 지나면 트레이닝이 완료되고 Predictor training 란이 Active로 표시될 겁니다. 트레이닝 결과를 보려면 Predictor training에서 View를 클릭합니다.
 
 
 ![03_predictor_2](https://user-images.githubusercontent.com/27226946/89359532-065e3d80-d701-11ea-8ab5-c1a6cde65d99.png)
@@ -72,29 +72,29 @@ Dataset Group의 이름 (retail_uk_sales_predictin) 을 입력하고 도메인�
 
 ## Step 3: Evaluation
 
-AutoML 결과는 Deep_AR_Plus가 14.23% 의 오류로 알고리즘으로 선택되었음을 보여줍니다.
+AutoML 결과 Deep_AR_Plus가 14.23% 의 오류 비율로 가장 적합한 알고리즘으로 선택되었습니다.
 
 ![03_predictor_3](https://user-images.githubusercontent.com/27226946/89359534-065e3d80-d701-11ea-9497-275cfe7d9e9b.png)
 
-그런 다음 예측을 생성하고 예측 생성을 누릅니다.
+예측을 생성하기 위해 Create a Forecast를 누릅니다.
 
 
 ## Step 4: Create a forecast
 
-예측명을 입력하고 예측자에 대해 방금 학습한 예측명을 선택합니다.예측 생성을 누릅니다.
+Forecast name에 이름을 입력하고 방금 트레이닝을 완료한 Predictor 를 선택합니다. Create a forecast 버튼을 누릅니다.
 
 ![04_forecast_1](https://user-images.githubusercontent.com/27226946/89359535-06f6d400-d701-11ea-845d-89c759fa7a9f.png)
 
-예측이 생성되면 상세내역을 검토합니다.
+예측이 생성되면 상세 내역을 검토합니다.
 
 
 ## Step 5: Export forecast
 
-예측 결과를 S3로 익스포트하고 수출 오른쪽에서 예측 내보내기 생성을 누릅니다.
+예측 결과를 S3에 내보냅니다. Exports 란의 오른쪽에 있는 Create forecast export 버튼을 누릅니다.
 
 ![05_export_1](https://user-images.githubusercontent.com/27226946/89359537-078f6a80-d701-11ea-9701-a703502ca9e5.png)
 
-익스포트명을 입력하고 생성된 예측을 지정합니다.예측 결과를 S3로 익스포트할 위치를 지정하고 예측 익스포트 생성을 누릅니다.
+Export name을 입력하고 Generated forcast를 선택합니다. 예측 결과를 내보낼 S3 경로를 지정하고 Create forcast export 버튼을 누릅니다.
 
 ![05_export_2](https://user-images.githubusercontent.com/27226946/89359538-078f6a80-d701-11ea-8f8c-915adb7f9fd7.png)
 ![05_export_3](https://user-images.githubusercontent.com/27226946/89359539-08280100-d701-11ea-9ce5-24e04fc96ade.png)
@@ -107,16 +107,16 @@ AutoML 결과는 Deep_AR_Plus가 14.23% 의 오류로 알고리즘으로 선택�
 
 ## Step 6: Visualization by QuickSight
 
-Amazon QuickSight에서 S3로 내보낸 예측 결과를 시각화해 보겠습니다.먼저 보안 및 권한에서 AWS 서비스에 대한 QuickSight 액세스 추가 또는 제거를 클릭하여 S3에서 파일을 읽을 수 있도록 허용합니다.
+Amazon QuickSight에서 S3로 내보낸 예측 결과를 시각화해 보겠습니다. 먼저 Quicksight 콘솔의 Quicksight 관리 메뉴로 들어가 보안 및 권한을 선택하고, AWS 서비스에 대한 QuickSight 액세스 추가 또는 제거 버튼을 클릭하여 S3에서 파일을 읽을 수 있도록 허용합니다.
 
 
 ![06_quicksight_1](https://user-images.githubusercontent.com/27226946/89359541-08c09780-d701-11ea-92f6-3183fc2ca187.png)
 
-예측을 내보낸 S3 버킷을 선택하고 Athena Workgroup에 대한 쓰기 권한 상자를 선택합니다.이제 미리 구성을 완료했습니다.
+예측을 내보낸 S3 버킷을 선택하고 Athena Workgroup에 대한 Write permission for Athena Workgroup 체크박스를 선택합니다. 이제 사전 구성을 완료했습니다.
 
 ![06_quicksight_2](https://user-images.githubusercontent.com/27226946/89359543-09592e00-d701-11ea-8b3d-25538c7a1cff.png)
 
-데이터를 로드하고 시각화합니다.상단 페이지에서 새 분석을 클릭합니다.
+데이터를 로드하고 시각화해 봅시다. 상단 페이지에서 새 분석을 클릭합니다.
 
 ![06_quicksight_3](https://user-images.githubusercontent.com/27226946/89359544-09592e00-d701-11ea-97a4-84644d21e73d.png)
 
