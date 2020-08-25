@@ -1,6 +1,6 @@
 # 클릭스트림 시계열 데이터에 대한 이상 감지 (SageMaker Random Cut Forest 와 DeepAR 알고리즘 활용)
 
-본 글은 시계열 데이터 분석 시리즈의 네번째 글입니다. 이번 글에서는 시계열 데이터 분석 중 이상감지 부분을 살펴보겠습니다. 이상 감지는 전처리작업에서 이상치를 찾아내는 것에서 부터 비즈니스 성과 모니터링의 매트릭에서 갑작스러운 급증이나 급감하는 이벤틀르 찾아 알람을 보내는 등 다양한 방식으로 응용됩니다. 예를 들어 다음과 같은 이상감지 시나리오를 생각해 볼 수 있습니다.
+본 글은 시계열 데이터 분석 시리즈의 네번째 글입니다. 이번 글에서는 시계열 데이터 분석 중 이상감지 부분을 살펴보겠습니다. 이상 감지는 전처리작업에서 이상치를 찾아내는 것에서 부터 비즈니스 성과 모니터링의 매트릭에서 갑작스러운 급증이나 급감하는 이벤트를 찾아 알람을 보내는 등 다양한 방식으로 응용됩니다. 예를 들어 다음과 같은 이상감지 시나리오를 생각해 볼 수 있습니다.
 
 - 이커머스 웹사이트에서 방문자 또는 클릭스트림 변화
 - 유통업에서 판매건수 또는 판매금액의 변화
@@ -11,7 +11,7 @@
 
 ![](imgs/randseries.png)
 
-그럼 이런 작업을 수학과 알고리즘으로 자동화할 수는 없을까요? 본 글에서는 SageMaker에서 제공하는 빌트인 알고리즘 두가지를 이용하여 이 문제를 해결해 보려고 합니다.
+그럼 이런 작업을 수학과 알고리즘으로 자동화할 수는 없을까요? 본 글에서는 SageMaker에서 제공하는 두 가지 빌트인 알고리즘을 이용하여 이 문제를 해결해 보려고 합니다. 그리고 동일한 원리로 Amazon Kinesis Analytics의 기능을 이용하여 이상감지를 하는 부분까지 살펴보겠습니다.
 
 
 ### 클릭스트림 데이터
@@ -103,7 +103,7 @@ pd.DataFrame(results['scores']).hist()
 
 ### SageMaker DeepAR
 
-많은 시계열 데이터 연구가 미래 시계열에 대한 예측을 다루고 있습니다. 이런 시계열 데이터 예측 알고리즘 또한 이상치의 탐색에 사용될 수 있습니다. 미래의 시계열은 과거의 패턴을 기반으로 합니다. 이것은 다시 말하면, 측정된 실제 시계열이 과거의 패턴과 많이 다르다면, (과거를 기반으로 예측된) 예측된 미래 시계열을 크게 벗어나게 될 것으로 이해할 수 있습니다.
+많은 시계열 데이터 연구가 미래 시계열에 대한 예측을 다루고 있습니다. 이런 시계열 데이터 예측 알고리즘 또한 이상치의 탐색에 사용될 수 있습니다. 미래의 시계열은 과거의 패턴을 기반으로 합니다. 이것은 다시 말하면, 측정된 실제 시계열이 과거의 패턴과 많이 다르다면, (과거를 기반으로 예측된) 예측된 미래 시계열을 크게 벗어나게 될 것이고, 이 범위를 벗어나는 경우 실측값에 이상현상이 나타나고 있다고 있다고 이해할 수 있을 것입니다.
 
 Amazon SageMaker DeepAR 알고리즘은 RNN(Recurrent Neural Networks)을 이용하여 단일차원의 시계열의 변량을 예측하는 지도학습 알고리즘입니다. DeeAR알고리즘은 ARIMA(autoregressive integrated moving average) 또는 ETS(exponential smoothing)와 같은 전통적인 알고리즘과 달리 연관된 시계열데이터(related timeseries)와 시계열에 대한 메타정보를 특성(feature)로 고려할 수 있습니다.
 
@@ -181,9 +181,74 @@ infs.index=pd.date_range(data[0]['start'], datetime.datetime.strptime(data[0]['s
 
 ![](imgs/deepar2.png)
 
+
+### Amazon Kinesis Analytics RCF
+
+추가로 Amazon Kinesis Analytics에 내장된 통계분산 함수를 이용하여 이상감지를 실행하는 방법을 살펴보겠습니다. Kinesis Analytics는 클릭스트림과 같은 실시간 스트리밍 데이터를 처리하고 분석하는 AWS 관리형 서비스입니다. Kinesis Data Analytics를 이용하면 스트리밍 데이터를 처리하고 분석할 수 있고, 스트림을 집계하거나 변경하고, 대시보드를 생성하거나 실시간 지표를 생성할 수도 있습니다. Kinesis Data Analytics 에서의 데이터변환은 SQL이나 Apache Flink 등을 이용하여 스트림을 변환할 수 있는 환경을 제공하며 많은 내장 함수를 제공하고 있습니다. 내장된 스트림 함수 중 이상감지와 관련한 함수는 RANDOM_CUT_FOREST와 RANDOM_CUT_FOREST_WITH_EXPLATION 함수가 있으며, 본 글에서는 RANDOM_CUT_FOREST_WITH_EXPLATION 함수를 이용하여 스트림의 이상감지를 진행합니다.
+
+동일한 데이터를 이용하여 이번에는 AWS Kinesis Data Stream으로 데이터를 전송합니다. Kinesis 스트림 데이터의 생성은 API나 [KPL(Kinesis Producer Library)](https://docs.aws.amazon.com/streams/latest/dev/developing-producers-with-kpl.html), 또는 [Amazon Kinesis Agent](https://docs.aws.amazon.com/streams/latest/dev/writing-with-agents.html) 등을 이용할 수 있습니다. 아래 코드는 AWS Python SDK의 [put_record](https://docs.aws.amazon.com/kinesis/latest/APIReference/API_PutRecord.html) API를 이용하여 데이터를 전송하는 예제입니다.
+
+```python
+kinesis_client = boto3.client('kinesis')          # define client with aws python SDK
+kinesis_data = json.dumps(make_kinesis_data(...)) # converts data to kinesis input format
+kinesis_client.put_record(                        # send record to the Cloud
+    StreamName=data_stream[0],
+    Data=kinesis_data,
+    PartitionKey=str(rnd)
+)
+```
+
+위 코드를 통해 생성한 Kinesis Data Stream을 입력소스로 하여 Kinesis Analytics에서 이 스트림을 변환하는 애플리케이션을 생성할 수 있으며 이 때 여러 내장함수를 호출할 수 있습니다. 아래 코드는 SQL을 이용하여 변환을 실행하고 RANDOM_CUT_FOREST 함수를 이용하여 이상감지를 실행하는 예제입니다. 마치 DB를 조회하는 SQL에서 내장함수를 호출하듯, RANDOM_CUT_FOREST_WITH_EXPLANATION 함수를 호출하고 스트림으로부터 ANOMALY_SCORE와 ANOMALY_EXPLANATION 값을 계산하게 됩니다.
+
+
+
+```sql
+CREATE OR REPLACE STREAM "TEMP_STREAM" (
+   "TIMESTAMPS"          TIMESTAMP,
+   "URLS"                INTEGER,
+   "USERS"               INTEGER,
+   "CLICKS"              INTEGER,
+   "ANOMALY_SCORE"       DOUBLE,
+   "ANOMALY_EXPLANATION" varchar(512));
+
+CREATE OR REPLACE PUMP "STREAM_PUMP" AS INSERT INTO "TEMP_STREAM"
+SELECT STREAM "TIMESTAMPS", "URLS", "USERS", "CLICKS", "ANOMALY_SCORE", "ANOMALY_EXPLANATION" FROM
+  TABLE(RANDOM_CUT_FOREST_WITH_EXPLANATION(
+    CURSOR(SELECT STREAM * FROM "SOURCE_SQL_STREAM_001"), -- inputStream
+    100, -- numberOfTrees
+    256, -- subSampleSize
+    100000, -- timeDecay
+    1, -- shingleSize
+    true
+  )
+);
+```
+
+알고리즘의 동작원리는 SageMaker에서 살펴본 내용과 동일합니다. RANDOM_CUT_FOREST와 달리 RANDOM_CUT_FOREST_WITH_EXPLANATION 함수에서는 추가로 해석과 관련한 값을 리턴해 줍니다. Anomaly score와 별도로 리턴되는 값은 다음과 같습니다.
+ 
+- Attribution score : 해당 컬럼이 anomaly score에 얼마나 영향을 미쳤는지에 대한 정량적 값
+- Strength : 해당 컬럼의 값이 가지는 방향성의 수준 
+- Directionality : 최근 관찰된 트랜드에 비하여 높으면 HIGH 그렇지 안으면 LOW값 리턴
+
+- Attribution score : A nonnegative number that indicates how much this column has contributed to the anomaly score of the record
+- Strength : A nonnegative number representing the strength of the directional recommendation.
+- Directionality : This is either HIGH if the value of the column is above the recently observed trend or LOW if it’s below the trend. During the learning phase, this defaults to LOW.
+
+Kineis Anaytics에서 리턴한 값을 살펴보겠습니다. SageMaker를 이용할 때처럼 이상치를 판단할 경계값을 결정하고 이 값을 초과하는 Anomaly Score를 가지는 레코드를 그래프로 표시해 보겠습니다. 아래 그림을 통해 Kinesis를 이용하여 찾아낸 이상치를 확인할 수 있습니다.
+
+![](imgs/kinesis.png)
+
+The graph at the bottom shows the portion to which each column contributed to the anomaly score.
+We can see that the number of clicks contributes a lot in general. And when the number of clicks or visitors does not change significantly, the number of pages contributes the most.(See the graph after 22:00 on 5th March.)
+
+아래 그래프는 이상치 값과 함께 컬럼별로 이 이상치 값에 기여한 정도를 표시한 것입니다. 아래쪽 그래프를 보시면 경계값을 넘는 이상치 점을 찾을 때에는 주로 클릭수가 영향을 미쳤다는 것을 확인할 수 있습니다. 그리고 3월 5일 22시 이후쪽을 보면, 클릭수나 방문자수가 크게 변동되지 않을 때에는 방문페이지(url)수가 Anomaly score를 계산할 때 보다 비중있게 다루어졌다는 것을 알 수 있습니다.
+
+![](imgs/attribution.png)
+
+
 ### 정리
 
-본 블로그에서 우리는 SageMaker의 빌트인 알고리즘을 사용하여 시계열데이터의 이상치를 감지하는 두가지 사례를 알아보았습니다. SageMaker의 빌트인 알고리즘을 사용하면 보다 간단히 모델을 개발할 수 있으며 실제 운영환경에도 보다 쉽게 배포할 수 있습니다.
+본 블로그에서 우리는 SageMaker의 빌트인 알고리즘을 사용하여 시계열데이터의 이상치를 감지하는 두가지 사례를 알아보았습니다. 그리고 Kinesis에 내장된 이상감지 함수를 이용하여 실시간 스트림으로부터 직접 이 값을 계산하는 방법을 살펴보았습니다. 이와 같이 SageMaker의 빌트인 알고리즘을 사용하면 보다 간단히 머신러닝 모델을 개발할 수 있으며 실제 운영환경에도 보다 쉽게 배포할 수 있습니다. 그리고 Kinesis Analytics을 이용하면 별도의 인프라 관리없이 실시간 스트림을 저장, 변환, 활용할 수 있으며 이를 위한 많은 부가기능들을 제공합니다.
 
 이 글은 시계열 데이터분석 시리즈의 마지막 글입니다. 우리는 지금까지 시계열 데이터를 다루는 4가지 주요 시나리오를 살펴보았습니다. 본 시리즈가 시계열 데이터의 다양한 문제를 다루는데 인사이트를 드릴 수 있었기를 기대합니다. 다른 블로그 포스트는 아래 링크에서 확인할 수 있습니다. 
 
