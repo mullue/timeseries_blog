@@ -219,7 +219,7 @@ The principle of the algorithm is the same as what we saw in SageMaker. Other th
 - Strength : A nonnegative number representing the strength of the directional recommendation.
 - Directionality : This is either HIGH if the value of the column is above the recently observed trend or LOW if it’s below the trend. During the learning phase, this defaults to LOW.
 
-Take a look at the values returned by Kineis Anaytics in the picture below. Just like SageMaker, the threshold for determining anomalies and plot records with Anomaly Scores that exceed this value. 
+Take a look at the values returned by Kineis Anaytics in the picture below. It plots records that its anomaly score exceeds the determined threshold value like we’ve seen with the SageMaker above. 
 
 ![](imgs/kinesis.png)
 
