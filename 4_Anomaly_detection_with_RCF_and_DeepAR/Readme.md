@@ -223,7 +223,7 @@ Take a look at the values returned by Kineis Anaytics in the picture below. It p
 
 ![](imgs/kinesis.png)
 
-The graph below shows the anomaly scores and the amount to which each column contributed. The graph at the bottom shows the portion to which each column contributed to the anomaly score. We can see that the number of clicks contributes a lot in general. And when the number of clicks or visitors does not change significantly, the number of pages contributes the most after 22:00 on 5th March.
+The graphs below shows the anomaly score and how each column attributed it. We can see that the number of clicks contributes a lot in general. And when the number of clicks or visitors does not change significantly, after 22:00, 5th March, the number of pages contributes the most.
 
 
 ![](imgs/attribution.png)
