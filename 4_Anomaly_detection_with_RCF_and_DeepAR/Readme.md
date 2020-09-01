@@ -173,9 +173,9 @@ The following figure is the result of resampling the prediction results from 10 
 
 ### Amazon Kinesis Analytics RCF
 
-In addition, let's see how to perform anomaly detection using the statistical variance and deviation function built into Amazon Kinesis Analytics. Kinesis Analytics is an AWS managed service that processes and analyzes real-time streaming data such as clickstreams. With Kinesis Data Analytics, you can process and analyze streaming data, aggregate or change streams, create dashboards, or generate real-time metrics. Data conversion in Kinesis Data Analytics provides an environment for converting streams using SQL or Apache Flink, and built-in functions to use. Among the built-in stream functions, there are RANDOM_CUT_FOREST and RANDOM_CUT_FOREST_WITH_EXPLATION functions to calculate Anomaly Score. In this article, we use RANDOM_CUT_FOREST_WITH_EXPLATION function.
+In addition, let's see how to perform anomaly detection using the statistical variance and deviation functions built in Amazon Kinesis Analytics. Kinesis Analytics is an AWS managed service that processes and analyzes real-time streaming data such as clickstreams. With Kinesis Data Analytics, you can process and analyze streaming data, aggregate or change streams, create dashboards, or generate real-time metrics. Data conversion in Kinesis Data Analytics provides an environment for converting streams using SQL or Apache Flink, and built-in functions. Among the built-in stream functions, there are RANDOM_CUT_FOREST and RANDOM_CUT_FOREST_WITH_EXPLATION functions to calculate anomaly score. In this article, we use the RANDOM_CUT_FOREST_WITH_EXPLATION function.
 
-With the same dataset, we will send the data to AWS Kinesis Data Stream. AWS provides APIs, [Kinesis Producer Library (KPL)](https://docs.aws.amazon.com/streams/latest/dev/developing-producers-with-kpl.html), or [Amazon Kinesis Agent](https://docs.aws.amazon.com/streams/latest/dev/writing-with-agents.html) to support this task. The code below is an example of sending data using the [put_record](https://docs.aws.amazon.com/kinesis/latest/APIReference/API_PutRecord.html) API in AWS Python SDK.
+With the same dataset, we will send the data to AWS Kinesis Data Stream. AWS provides APIs, [Kinesis Producer Library (KPL)](https://docs.aws.amazon.com/streams/latest/dev/developing-producers-with-kpl.html), and [Amazon Kinesis Agent](https://docs.aws.amazon.com/streams/latest/dev/writing-with-agents.html) to support this task. The code below is an example of sending data using the [put_record](https://docs.aws.amazon.com/kinesis/latest/APIReference/API_PutRecord.html) API in AWS Python SDK.
 
 
 ```python
@@ -188,7 +188,7 @@ kinesis_client.put_record(                        # send record to the Cloud
 )
 ```
 
-Now you can create a Kinesis Analytics application that transforms the Kinesis Data Stream soruce that you created with above code. When writing transform code you can call built-in functions. The code below is an example of executing RANDOM_CUT_FOREST function with standard SQL. Just like calling internal functions with SQL for Relational Database, you can simply call RANDOM_CUT_FOREST_WITH_EXPLANATION function and calcuate ANOMALY_SCORE and ANOMALY_EXPLANATION values from the stream.
+Now you can create a Kinesis Analytics application that transforms the Kinesis Data Stream source that you created with above code. When writing transform code you can call built-in functions. The code below is an example of executing the RANDOM_CUT_FOREST function with standard SQL. Just like calling internal functions with SQL for a Relational Database, you can simply call the RANDOM_CUT_FOREST_WITH_EXPLANATION function and calcuate ANOMALY_SCORE and ANOMALY_EXPLANATION values from the stream.
 
 
 ```sql
@@ -213,17 +213,17 @@ SELECT STREAM "TIMESTAMPS", "URLS", "USERS", "CLICKS", "ANOMALY_SCORE", "ANOMALY
 );
 ```
 
-The principle of the algorithm is the same as what we saw in SageMaker. Other than RANDOM_CUT_FOREST, the RANDOM_CUT_FOREST_WITH_EXPLANATION function additionally returns values related to interpretation The values returned by this function apart from Anomaly score are as follows:
+The principle of the algorithm is the same as what we saw in SageMaker. Other than the RANDOM_CUT_FOREST, the RANDOM_CUT_FOREST_WITH_EXPLANATION function returns additional values related to interpretation. In addition to the anomaly score, the values returned by this function are as follows:
 
-- Attribution score : A nonnegative number that indicates how much this column has contributed to the anomaly score of the record
+- Attribution score : A nonnegative number that indicates how much this column has contributed to the anomaly score of the record.
 - Strength : A nonnegative number representing the strength of the directional recommendation.
 - Directionality : This is either HIGH if the value of the column is above the recently observed trend or LOW if it’s below the trend. During the learning phase, this defaults to LOW.
 
-Take a look at the values returned by Kineis Anaytics in the picture below. Just like SageMaker, determine the threshold for determining anomalies and plot records with Anomaly Scores that exceed this value. 
+Take a look at the values returned by Kineis Anaytics in the picture below. It plots records that its anomaly score exceeds the determined threshold value like we’ve seen with the SageMaker above. 
 
 ![](imgs/kinesis.png)
 
-The graph below shows the anomaly scores and the amount to which each column contributed. The graph at the bottom shows the portion to which each column contributed to the anomaly score. We can see that the number of clicks contributes a lot in general. And when the number of clicks or visitors does not change significantly, the number of pages contributes the most after 22:00 on 5th March.
+The graphs below shows the anomaly score and how each column attributed it. We can see that the number of clicks contributes a lot in general. And when the number of clicks or visitors does not change significantly, after 22:00, 5th March, the number of pages contributes the most.
 
 
 ![](imgs/attribution.png)
