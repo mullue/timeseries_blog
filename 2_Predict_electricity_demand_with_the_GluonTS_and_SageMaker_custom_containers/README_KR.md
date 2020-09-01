@@ -1,5 +1,4 @@
 # SageMaker 커스텀 컨테이너와 GluonTS로 전력 수요 예측하기
-Learn how to train and evaluate time series models with the Gluon TS library, and then deploy them for inference as a Multi-Model Server SageMaker endpoint using a custom SageMaker container.
 Gluon TS 라이브러리를 사용하여 시계열 모델을 트레이닝하고 평가한 다음, SageMaker 커스텀 컨테이너를 사용하여 추론용 다중 모델 서버 SageMaker 엔드포인트를 배포하는 방법을 알아봅니다.
 
 ## 레벨
