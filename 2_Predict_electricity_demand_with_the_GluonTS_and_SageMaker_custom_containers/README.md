@@ -16,31 +16,26 @@ Learn how to train and evaluate time series models with the Gluon TS library, an
 ![alt text](images/gluonts_sagemaker.png "Logo Title Text 1")
 
 ## Getting Started
-1. Set the the Conda virtual environment by excuting the command below:
+1. Set the the Conda virtual environment by excuting the command below (this process requires a bit long waiting time):
 
     ./build_env.sh
 
 2. Run the Jupyter Notebooks (select the Kernel named conda_gluonts-multimodel).
-    - 00_predict_electricity_demand_with_the_gluonts_library.ipynb
-    - 01_deploy_gluonts_forecast_models_as_multi_model_endpoints.ipynb
+    - 01_predict_electricity_demand_with_the_gluonts_library.ipynb
+    - 02_deploy_gluonts_forecast_models_as_multi_model_endpoints.ipynb
 
 ## Outline
 - 1. Introduction
 - 2. Problem definition
 - 3. Architecture design
-- 4. Prepare the Data - Download data - Resample data with pandas
+- 4. Data Discovery
 - 5. Machine Learning Models
-    - Train/Evaluate the mean model
-    - Train/Evaluate the seasonal naive model
-    - Train/Evaluate the exponential smoothing (ETS) model
-    - Train/Evaluate the Prophet model
-    - Train/Evaluate the DeepAR model
-    - Comparison of models
 - 6. Prepare the model artifacts for deployment
-- 7. How to build the custom Sagemaker container for model deployment.
-- 8. How to deploy models as Sagemaker Multi-model Endpoint and invoke the Endpoint.
-- 9. Clean up the resources.
-- 10. Conclusion
+- 7. How to build the custom Sagemaker container for model deployment
+- 8. How to deploy models as Sagemaker Multi-model Endpoint and invoke the Endpoint
+- 9. How to Do Batch Transform in the Multi Model Server Framework
+- 10. Clean up the resources.
+- 11. Conclusion
 
 ## License
 
