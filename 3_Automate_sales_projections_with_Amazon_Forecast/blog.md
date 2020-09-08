@@ -1,197 +1,200 @@
-# Introduction
+# Automate sales projections with Amazon Forecast, QuickSight and AWS Step Functions
 
-In the retail industry, forecasting sales and visitor numbers is an important topic that directly affects your business. Accurate sales forecasting can help you avoid overstocked merchandise, lost sales opportunities, and achieve more business. Accurately predicting the number of visitors will also allow you to properly plan employee shifts and use the information as an aid to forecast sales. On the other hand, although POS data is stored on the system, many people think that it may be difficult to utilize AI and machine learning. In this blog, I'll show you how Amazon Forecast, an AI service provided by AWS for time-series forecasting, can be used to make predictions without difficult programming or anything else. We'll also go one step further and explain how it can be easily implemented in a systematic way with daily batches, for example. By systematization, all you have to do is feed data into the storage called S3, the data pipeline is executed, and the prediction results can be output to S3.
+In the retail industry, forecasting sales and visitor numbers is an important topic that directly affects your business. Accurate sales forecasting can help you avoid overstocked merchandise and lost sales opportunities: reducing costs and increasing revenue. Accurately predicting the number of visitors will also enable you to efficiently plan employee shifts and provide better customer service.
 
-# Problem definition
-
-This blog uses sales data from a UK e-commerce company published on the internet to forecast sales for the following week. We will use Amazon Forecast to make sales forecasts, either manually in the GUI or automatically by building a pipeline. The results of the forecast are visualized using Amazon QuickSight, allowing management to get an immediate view of the sales forecast.
+Even though POS data is available, it might seem daunting to get started applying AI and machine learning to improve forecasts. In this blog, We'll show you how Amazon Forecast, an AI service provided by AWS for time-series forecasting, can be used to make predictions without any machine learning or complex programming experience needed. We'll also go one step further and show how Forecast can be easily integrated with a data pipeline so that updated forecasts can be automatically generated and exported whenever a new batch of data is uploaded to Amazon S3.
 
 
-# Architecture design
+## Problem definition
+
+This blog uses sales data from a UK e-commerce company published on the internet to forecast sales for the following week. We will use Amazon Forecast to create sales forecasts, either manually in the GUI or automatically by building a pipeline. The results of the forecast are visualized using Amazon QuickSight, allowing management to get an immediate view of the sales forecast.
 
 
+## Architecture design
 
-## first : manual forecasting and visualization
+### First Phase: Manual forecasting and visualization
 
-The first step is to perform sales forecasting by operating the console. From the console, you import data in Amazon Forecast, train the forecasters, run the forecasts, and export the results of the forecasts. The exported forecast results are then visualized in Amazon QuickSight.
+For the initial solution, we'll perform sales forecasting using the AWS Console: importing data to Amazon Forecast, training models, runing forecasts, and exporting the results. We'll then visualize the exported forecasts in Amazon QuickSight.
 
-![01_arch_design_1](https://user-images.githubusercontent.com/27226946/89359516-0100f300-d701-11ea-8bf0-f4fbe3204119.png)
-
-
-## second : auto forecasting with AWS Step Functions and AWS Lambda
-
-Triggered by the data upload to S3, it automatically imports data, learns predictors, executes predictions, and exports the results of the prediction, all done by manual execution. The pipeline is configured using AWS Lambda and AWS Step Funcions. The output prediction results are visualized using Amazon QuickSight.
-
-![01_arch_design_2](https://user-images.githubusercontent.com/27226946/89359520-02cab680-d701-11ea-979c-c1f35cb07292.png)
+![arch overview diagram simple](https://user-images.githubusercontent.com/27226946/89359516-0100f300-d701-11ea-8bf0-f4fbe3204119.png)
 
 
-# Data - Download data - Data analysis (see missing data etc.)
+### Second Phase: Automatic forecasting with AWS Step Functions and AWS Lambda
 
-Run 1_prepare_dataset.ipynb. Download data and calculate sales as the target variable. Prepare data from 2009/12/01 to 2010/12/02 as training data and upload them to S3. And as additional training data, from 2009/12/01 to 2010/12/09, we upload the data from 2009/12/01 to 2010/12/09 to S3.
+Next, we'll set up a pipeline powered by AWS Step Functions and AWS Lambda: Automating the manual steps. New data uploaded to Amazon S3 will automatically be imported and analyzed - creating forecasts ready to be visualized in Amazon QuickSight.
 
-https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projections_with_Amazon_Forecast/1_prepare_dataset.ipynb
+![arch overview diagram pipeline](https://user-images.githubusercontent.com/27226946/89359520-02cab680-d701-11ea-979c-c1f35cb07292.png)
 
 
+## Getting started
 
-# Forecast - import dataset - AutoML - Evaluation
+**TODO: instructions on initial setup e.g. CF template, instance?**
+
+First, follow through the first notebook [1_prepare_dataset.ipynb](1_prepare_dataset.ipynb) - downloading data and preparing the target variable (sales). In the notebook you'll prepare an initial training data set from 2009/12/01 to 2010/12/02, and an additional dataset from 2009/12/01 to 2010/12/09. At the end, both will be uploaded to Amazon S3.
+
+
+## Using Amazon Forecast through the Console GUI
 
 Once we have stored the training data in S3, we can go to the Amazon Forecast console and create the dataset.
 
-## Step 1: Import dataset
+### Step 1: Import the dataset
 
-Enter the name of the dataset group (retail_uk_sales_predictin), select Retail as the domain and click Next.
+Enter the name of the dataset group (`retail_uk_sales_prediction`), select **Retail** as the domain and click Next.
 
-![02_import_1](https://user-images.githubusercontent.com/27226946/89359522-03fbe380-d701-11ea-8ffd-9d0ffbd0290d.png)
+![Create dataset group screen](https://user-images.githubusercontent.com/27226946/89359522-03fbe380-d701-11ea-8ffd-9d0ffbd0290d.png)
 
-Enter a name for the dataset (uk_sales) and select day as the forecast unit, leave the Data schema intact and click Next.
+Enter a name for the dataset (`uk_sales`) and select **day** as the forecast unit, leave the Data schema as default and click Next.
 
-![02_import_2](https://user-images.githubusercontent.com/27226946/89359523-04947a00-d701-11ea-86e0-15d5768a08db.png)
+![Create target time series dataset screen](https://user-images.githubusercontent.com/27226946/89359523-04947a00-d701-11ea-86e0-15d5768a08db.png)
 
-Enter Dataset Import name (uk_sales_2009120101_20101202) and create a new IAM Role. In the Data location field, enter the S3 path of the training data that you have stored in the previous preparation and click Create.
+Enter Dataset Import name (`uk_sales_2009120101_20101202`) and create a new IAM Role. In the Data location field, enter the S3 path of the training data that you uploaded in the data preparation notebook and click Create.
 
-![02_import_3](https://user-images.githubusercontent.com/27226946/89359527-052d1080-d701-11ea-83c4-e1c751041a77.png)
+![Import target time series data screen](https://user-images.githubusercontent.com/27226946/89359527-052d1080-d701-11ea-83c4-e1c751041a77.png)
 
-Wait until the target time series data becomes active. Next, we train the predictor.
+Wait until the target time series data becomes active before moving on to the next step.
 
-![02_import_4](https://user-images.githubusercontent.com/27226946/89359528-05c5a700-d701-11ea-9e49-3ed2cd399bc8.png)
-
-
-## Step 2: Build predictor with AutoML
-
-Click Start for Predictor training. Enter the Predictor name and enter 7, the time period you want to forecast, in the Forecast horizon. You may want to use the calendar information built into Amazon Forecast for a potentially more accurate forecast. Select United Kingdom as the Country for holidays - optional and click Create.
-
-![03_predictor_1](https://user-images.githubusercontent.com/27226946/89359529-05c5a700-d701-11ea-9e7a-eff879bb6bae.png)
-
-The training will begin. After a short period of time, the training is complete and you will see the word Acitive in Predictor training. Click View in Predictor training to see the training results.
-
-![03_predictor_2](https://user-images.githubusercontent.com/27226946/89359532-065e3d80-d701-11ea-8ab5-c1a6cde65d99.png)
+![Forecast dashboard screen](https://user-images.githubusercontent.com/27226946/89359528-05c5a700-d701-11ea-9e49-3ed2cd399bc8.png)
 
 
+### Step 2: Build a predictor with AutoML
 
-## Step 3: Evaluation
+Click the **Start** button under *Predictor training*. Name your predictor and set the time period you want to forecast (the *Forecast Horizon*) to `7`. You may want to use the calendar information built into Amazon Forecast for a potentially more accurate forecast: Select United Kingdom as the *Country for holidays - optional*. Leave other options as default and click **Create**.
 
-AutoML results show that Deep_AR_Plus is chosen as the algorithm, with an error of 14.23%.
+![Train predictor screen](https://user-images.githubusercontent.com/27226946/89359529-05c5a700-d701-11ea-9e7a-eff879bb6bae.png)
 
-![03_predictor_3](https://user-images.githubusercontent.com/27226946/89359534-065e3d80-d701-11ea-9497-275cfe7d9e9b.png)
+Amazon Forecast will now begin training models on your imported data. After some time, *Predictor training* status will update to **Active** indicating the training is complete. Click **View** in *Predictor training* to explore the training results.
 
-Next, generate a prediction and click Create a Forecast.
-
-
-## Step 4: Create a forecast
-
-Enter a forecast name and choose the one you just learned for Predictor. Click Create a forecast.
-
-![04_forecast_1](https://user-images.githubusercontent.com/27226946/89359535-06f6d400-d701-11ea-845d-89c759fa7a9f.png)
-
-Once the forecast is generated, review the details.
+![Forecast dashboard screen](https://user-images.githubusercontent.com/27226946/89359532-065e3d80-d701-11ea-8ab5-c1a6cde65d99.png)
 
 
-## Step 5: Export forecast
+### Step 3: Evaluate the model
 
-Export the forecast results to S3, and to the right of Exports, click Create forecast export.
+AutoML results will show which algorithm was selected as the best for your dataset, along with metrics describing the best performance on the training data. In our example below, `Deep_AR_Plus` was the most accurate algorithm reaching an average error of 14.23%:
 
-![05_export_1](https://user-images.githubusercontent.com/27226946/89359537-078f6a80-d701-11ea-9701-a703502ca9e5.png)
+![Predictor details screen](https://user-images.githubusercontent.com/27226946/89359534-065e3d80-d701-11ea-9497-275cfe7d9e9b.png)
 
-Enter an export name and specify Generated forecast. Specify where you want to export the forecast results to S3 and click Create forecast export.
-
-![05_export_2](https://user-images.githubusercontent.com/27226946/89359538-078f6a80-d701-11ea-8f8c-915adb7f9fd7.png)
-![05_export_3](https://user-images.githubusercontent.com/27226946/89359539-08280100-d701-11ea-9ce5-24e04fc96ade.png)
+To generate a prediction, click **Create a Forecast**.
 
 
-The predictions were exported to the specified S3 path.
-![05_export_4](https://user-images.githubusercontent.com/27226946/89359540-08c09780-d701-11ea-8376-9fc21cd40164.png)
+### Step 4: Create a forecast
+
+Enter a forecast name and choose the Predictor you just trained. Click **Create a forecast**.
+
+![Create a forecast screen](https://user-images.githubusercontent.com/27226946/89359535-06f6d400-d701-11ea-845d-89c759fa7a9f.png)
+
+Once the forecast is generated after a short period of time, review the details.
 
 
-## Step 6: Visualization by QuickSight
+### Step 5: Export the forecast
 
-Let's visualize the prediction results exported to S3 in Amazon QuickSight. First, click Add or remove QuickSight access to AWS services from Security & permissions to allow the file to be read from S3.
+Forecasts can be queried through the Amazon Forecast API in real time, or exported to Amazon S3 which is what we'll do here. To get started, click the **Create forecast export** button to the right of *Exports*.
 
-![06_quicksight_1](https://user-images.githubusercontent.com/27226946/89359541-08c09780-d701-11ea-92f6-3183fc2ca187.png)
+![Forecast details screen](https://user-images.githubusercontent.com/27226946/89359537-078f6a80-d701-11ea-9701-a703502ca9e5.png)
 
-Select the S3 bucket to which you exported the predictions and check the Write permission for Athena Workgroup box. You have now completed your preconfiguration.
+Enter an *Export name* and specify the *Generated forecast* you just created. Specify where you want to export the forecast results to in Amazon S3, and click **Create forecast export**.
 
-![06_quicksight_2](https://user-images.githubusercontent.com/27226946/89359543-09592e00-d701-11ea-8b3d-25538c7a1cff.png)
+![Create forecast export screen](https://user-images.githubusercontent.com/27226946/89359538-078f6a80-d701-11ea-8f8c-915adb7f9fd7.png)
 
-Load the data and visualize it. Click New analysis on the top page.
+The export process will appear in the Amazon Forecast console, and take a short period of time to complete:
 
-![06_quicksight_3](https://user-images.githubusercontent.com/27226946/89359544-09592e00-d701-11ea-97a4-84644d21e73d.png)
+![Forecast details screen](https://user-images.githubusercontent.com/27226946/89359539-08280100-d701-11ea-9ce5-24e04fc96ade.png)
 
-Select S3.
+Once the export is done, you'll be able to access the prediction results at the location you specified in Amazon S3.
 
-![06_quicksight_4](https://user-images.githubusercontent.com/27226946/89359545-09f1c480-d701-11ea-83c5-812eec305287.png)
+![S3 Console screen](https://user-images.githubusercontent.com/27226946/89359540-08c09780-d701-11ea-8376-9fc21cd40164.png)
 
-Enter an arbitrary value in Data source name to specify a manifest file for S3 loading. The manifest file is created when the notebook is executed and uploaded to S3.
+
+### Step 6: Visualize in Amazon QuickSight
+
+Let's visualize the prediction results exported to S3 in Amazon QuickSight. First, click **Add or remove QuickSight access to AWS services** from *Security & permissions* to allow the file to be read from S3.
+
+![QuickSight security screen](https://user-images.githubusercontent.com/27226946/89359541-08c09780-d701-11ea-92f6-3183fc2ca187.png)
+
+Select the S3 bucket to which you exported the predictions and check the *Write permission for Athena Workgroup* box. You have now completed your preconfiguration.
+
+![QuickSight select buckets screen](https://user-images.githubusercontent.com/27226946/89359543-09592e00-d701-11ea-8b3d-25538c7a1cff.png)
+
+Load the data and visualize it. Click **New analysis** on the top page.
+
+![QuickSight home screen](https://user-images.githubusercontent.com/27226946/89359544-09592e00-d701-11ea-97a4-84644d21e73d.png)
+
+Select **S3** as the data set source.
+
+![QuickSight create data set screen](https://user-images.githubusercontent.com/27226946/89359545-09f1c480-d701-11ea-83c5-812eec305287.png)
+
+**TODO: Not clear, broken?**
+
+Name your Data source to specify a manifest file for S3 loading. The manifest file is created when the notebook is executed and uploaded to S3.
 
 https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projections_with_Amazon_Forecast/manifest_for_quicksight/manifest_uk_sales_pred.json
 
 
-![06_quicksight_5](https://user-images.githubusercontent.com/27226946/89359546-0a8a5b00-d701-11ea-8d8a-c3b8dd12b1dd.png)
+![QuickSight new S3 data source screen](https://user-images.githubusercontent.com/27226946/89359546-0a8a5b00-d701-11ea-8d8a-c3b8dd12b1dd.png)
 
 When the data is loaded into SPICE, click Visualize.
 
-![06_quicksight_6](https://user-images.githubusercontent.com/27226946/89359547-0a8a5b00-d701-11ea-819f-f4bf2010965d.png)
+![QuickSight finish data set creation screen](https://user-images.githubusercontent.com/27226946/89359547-0a8a5b00-d701-11ea-819f-f4bf2010965d.png)
 
-Select the line graph and select date for X axis and p10(sum), p50(sum) and p90(sum) for Value. You can now visualize.
+Select the **line graph** visual type.
 
-![06_quicksight_7](https://user-images.githubusercontent.com/27226946/89359548-0b22f180-d701-11ea-8229-13590e2f63b0.png)
-![06_quicksight_8](https://user-images.githubusercontent.com/27226946/89359549-0bbb8800-d701-11ea-9e5d-ff1859058533.png)
+![QuickSight Visualize screen](https://user-images.githubusercontent.com/27226946/89359548-0b22f180-d701-11ea-8229-13590e2f63b0.png)
 
-For the sake of simplicity, we loaded the S3 data directly, but you can also use Amazon Athena if you want to process it in advance with queries.
+Select `date` for *X axis* and three series `p10(sum)`, `p50(sum)` and `p90(sum)` for *Value*. You can now visualize.
 
+![QuickSight rendered line graph](https://user-images.githubusercontent.com/27226946/89359549-0bbb8800-d701-11ea-9e5d-ff1859058533.png)
 
-# Lambda trigger - lambda job to trigger retrain and report building when new data posted to s3
-
-Next, we'll leverage AWS Lambda and AWS Step Functions to build a pipeline. AWS Step Functions are triggered by the data input to S3, which automatically imports data from Amazon Forecast, builds the forecasters, predicts, and exports the results.
+For simplicity we loaded the S3 data directly, but you can also use Amazon Athena if you want to process it in advance with queries.
 
 
-![07_arch](https://user-images.githubusercontent.com/27226946/89359550-0bbb8800-d701-11ea-82f1-7e8ec30952f6.png)
+## Automating forecasts with AWS Step Functions and AWS Lambda Lambda trigger - lambda job to trigger retrain and report building when new data posted to s3
 
-Run the notebook in 2_building_pipeline.ipynb to build the pipeline and upload the data to S3.
+Next, we'll leverage AWS Lambda and AWS Step Functions to build a pipeline. Uploading data input to S3 triggers an AWS Step Functions *state machine*. The state machine defines the flow of steps in the pipeline, using AWS Lambda functions to import data into Amazon Forecast and then create and export forecasts.
 
-https://github.com/glyfnet/timeseries_blog/blob/master/3_Automate_sales_projections_with_Amazon_Forecast/2_building_pipeline.ipynb
+![arch overview diagram pipeline](https://user-images.githubusercontent.com/27226946/89359550-0bbb8800-d701-11ea-82f1-7e8ec30952f6.png)
+
+Run the second notebook [2_building_pipeline.ipynb](2_building_pipeline.ipynb) to set up the pipeline and upload sample data to Amazon S3.
 
 
-## Step 1: create Lambda functions
+### Step 1: create Lambda functions
 
 Using boto3, we will create functions to import data from Amazon Forecast, create a predictor, forecast, and export the forecast results. We will also create a function to get the status of each job.
 
-## Step 2: create Step Functions state machine
+
+### Step 2: create Step Functions state machine
 
 StepFunctions proceeds by issuing a job, checking the status of the job, waiting if it is not completed, and moving on to the next job when it is completed.
 
-![08_stepfunctions](https://user-images.githubusercontent.com/27226946/89359551-0c541e80-d701-11ea-93f1-404066bf3fcd.png)
+![State machine diagram](https://user-images.githubusercontent.com/27226946/89359551-0c541e80-d701-11ea-93f1-404066bf3fcd.png)
 
 
-## Step 3: Cloud Trail and Cloud Watch Events
+### Step 3: Cloud Trail and Cloud Watch Events
 
 Configure Cloud Trail and CloudWatch to run Step Functions when the files are stored in S3. The Step Functions developer's guide is helpful.
 
 https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-cloudwatch-events-s3.html
 
 
-## Step 4: put additional data and visualize
+### Step 4: put additional data and visualize
 
 The Step Functions pipeline is executed as a data put and trigger to S3. It takes a bit of time for it to run to the end. Once the job is completed, the results are stored in S3. When we check the predictor with the additional data, Deep_AR-Plus is selected, with a margin of error of 8.14%.
 
+![Predictor detail screen](https://user-images.githubusercontent.com/27226946/89359552-0cecb500-d701-11ea-8e29-93bee36a2cae.png)
 
-![09_predictor](https://user-images.githubusercontent.com/27226946/89359552-0cecb500-d701-11ea-8e29-93bee36a2cae.png)
 
-
-## Step 5: Visualize with QuickSight
+### Step 5: Visualize with QuickSight
 
 The same steps as in the first half of this section can be used to visualize
 
-![10_quicksight](https://user-images.githubusercontent.com/27226946/89359553-0cecb500-d701-11ea-83e5-e618ca164fa5.png)
+![QuickSight forecast visualization](https://user-images.githubusercontent.com/27226946/89359553-0cecb500-d701-11ea-83e5-e618ca164fa5.png)
 
 
 
-# Conclusion
+## Conclusion
+
 Time series forecasting has a lot of opportunities to be used in various aspects of business and can make your business bigger. As I have explained, you can easily verify it from the GUI, so why not give it a try first? When it comes to actually integrating it into your business processes, you can easily configure an automated pipeline using AWS Step Functions and AWS Lambda. Why not try it out with your existing data first?
 
 We have covered 4 big scenarios to handle timeseres data. You can find other posts below:
 
-* Introduction to time series forecasting with SageMaker and Python by Eric Greene
-* Benchmarking popular time series forecasting algorithms on electricity demand forecast by Yin Song
-* Anomaly Detection of timeseries by Seongmoon Kang
-
-
+- Introduction to time series forecasting with SageMaker and Python by Eric Greene
+- Benchmarking popular time series forecasting algorithms on electricity demand forecast by Yin Song
+- Anomaly Detection of timeseries by Seongmoon Kang
