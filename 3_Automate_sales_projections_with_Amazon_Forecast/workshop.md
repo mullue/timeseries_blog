@@ -4,5 +4,4 @@
 4. Upload some data to S3 (via NB or manual) and check that the pipeline works properly creating new forecasts each time(with skipping movie)
 
 
-Click here to provision the **project stack**: <br/>[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)]
-(https://us-east-1.console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=timeseriesblog3&templateURL=https://time-series-blog.s3.amazonaws.com/template.yaml)
+Click here to provision the **project stack**: [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://us-east-1.console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=timeseriesblog3&templateURL=https://time-series-blog.s3.amazonaws.com/template.yaml)
