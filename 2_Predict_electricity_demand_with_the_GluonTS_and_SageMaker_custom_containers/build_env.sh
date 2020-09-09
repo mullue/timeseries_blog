@@ -45,7 +45,7 @@ pip install gluonts==0.5.0
 
 # add this as a kernel
 pip install ipykernel
-#python -m ipykernel install --user --name ${ENV_NAME} --display-name "${ENV_NAME}"
+python -m ipykernel install --user --name ${ENV_NAME} --display-name "${ENV_NAME}"
 
 # Cleanup
 conda deactivate

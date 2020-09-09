@@ -118,6 +118,13 @@ end_training = pd.Timestamp("2014-01-31 00:00:00", freq=freq)
 # number of time series selected
 n_timeseries = 100
 
+account_id = boto3.client('sts').get_caller_identity()['Account']
+region = boto3.Session().region_name
+bucket = 'sagemaker-{}-{}'.format(region, account_id)
+prefix = 'demo-multimodel-gluonts-endpoint'
+output_dir = 'data'
+models_dir = "models"
+
 def write_dicts_to_file(path, data):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'wb') as fp:
