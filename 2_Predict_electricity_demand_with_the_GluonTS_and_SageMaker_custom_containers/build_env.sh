@@ -6,7 +6,7 @@ ENV_NAME=gluonts-multimodel
 mkdir -p "${WORKING_DIR}"
 
 # Install Miniconda to get a separate python and pip
-wget https://repo.anaconda.com/miniconda/Miniconda3-4.5.12-Linux-x86_64.sh -O "$WORKING_DIR/miniconda.sh"
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O "$WORKING_DIR/miniconda.sh"
 
 # Install Miniconda into the working directory
 bash "$WORKING_DIR/miniconda.sh" -b -u -p "$WORKING_DIR/miniconda"
