@@ -31,11 +31,13 @@ function get_data(db, table, id, callback) {
 
 function update_actuals(db, actuals, location_id) {  
     console.log("location_id="+location_id);
+    console.log('updating')
     if (location_id != "") {
         get_data(db, 'actuals', location_id, function(data) {
             actuals.data.id = get_ids(data.id, data.target.length);
             actuals.data.start =  get_times(data.start, data.target.length);
             actuals.data.target = data.target; 
+            actuals.data.ma = data.ma; 
             actuals.change.emit();
         });
     }    
